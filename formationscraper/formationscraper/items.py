@@ -9,4 +9,21 @@ import scrapy
 class FormationscraperItem(scrapy.Item):
     # define the fields for your item here like:
     # name = scrapy.Field()
-    pass
+
+    #### items de formation
+    formation_intitule = scrapy.Field()
+    formation_rncp = scrapy.Field()
+    formation_rs = scrapy.Field()
+    formation_reussite = scrapy.Field()
+    formation_certifications = scrapy.Field()
+
+    #### items de session
+    session_sous_intitule = scrapy.Field()
+    session_distanciel = scrapy.Field()
+    session_alternance = scrapy.Field()
+    session_date_limite = scrapy.Field()
+    session_date_debut = scrapy.Field()
+    session_duree = scrapy.Field()
+    session_lieu = scrapy.Field()
+    session_niveau = scrapy.Field()
+
