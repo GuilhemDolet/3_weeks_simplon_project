@@ -16,6 +16,7 @@ class FormationscraperItem(scrapy.Item):
     formation_rs = scrapy.Field()
     formation_reussite = scrapy.Field()
     formation_certifications = scrapy.Field()
+    formation_id = scrapy.Field()
 
     #### items de session
     session_sous_intitule = scrapy.Field()
@@ -26,4 +27,3 @@ class FormationscraperItem(scrapy.Item):
     session_duree = scrapy.Field()
     session_lieu = scrapy.Field()
     session_niveau = scrapy.Field()
-
