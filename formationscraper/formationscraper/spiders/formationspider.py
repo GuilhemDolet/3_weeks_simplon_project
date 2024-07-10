@@ -68,9 +68,9 @@ class FormationspiderSpider(scrapy.Spider):
             session_alternance = True if (sess.xpath(".//a[contains(@href,'https://simplon.co/i-apply?tags=alternance')]").get()) else False
             session_date_limite = sess.xpath(".//div[contains(@class, 'date-bloc')]").get()
             session_date_debut = sess.xpath(".//div[@class='card-session-info calendar']").get()
-            session_duree = sess.xpath("(//i[contains(@class,'material-icons')])[1]/parent::node()/text()[1]").get()
-            session_lieu = sess.xpath("").get()
-            session_niveau = sess.xpath("").get()
+            session_duree = sess.xpath("(//i[contains(@class,'material-icons')])[2]/parent::node()/text()[1]").get() 
+            session_lieu = sess.xpath("(//i[contains(@class,'material-icons')])[1]/parent::node()/text()[1]").get()
+            session_niveau = sess.xpath("(//i[contains(@class,'material-icons')])[4]/parent::node()/text()[1]").get()
 
             item['sous-intitule'] = session_sous_intitule
             item['distanciel'] = session_distanciel
