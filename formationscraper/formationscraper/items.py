@@ -15,7 +15,6 @@ class FormationscraperItem(scrapy.Item):
     formation_rncp = scrapy.Field()
     formation_rs = scrapy.Field()
     formation_reussite = scrapy.Field()
-    formation_certifications = scrapy.Field()
     formation_id = scrapy.Field()
 
     #### items de session

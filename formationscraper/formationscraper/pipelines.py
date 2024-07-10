@@ -5,9 +5,12 @@
 
 
 # useful for handling different item types with a single interface
+#from formationscraper.items import FormationscraperItem
 from itemadapter import ItemAdapter
-
 
 class FormationscraperPipeline:
     def process_item(self, item, spider):
         return item
+    
+class DatabasePipelineFormation : 
+    pass
