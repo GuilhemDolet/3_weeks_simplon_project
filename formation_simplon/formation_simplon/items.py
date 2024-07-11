@@ -15,6 +15,7 @@ class FormationSimplonItem(scrapy.Item):
     code_rs = scrapy.Field()
     voie_acces = scrapy.Field()
     
+    agence = scrapy.Field()
     date_limite = scrapy.Field()
     region = scrapy.Field()
     distanciel = scrapy.Field()

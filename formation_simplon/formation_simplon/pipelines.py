@@ -10,6 +10,7 @@ class FormationSimplonPipeline:
         item = self.clean_voie_acces(item)
 
         # items de la page session
+        item = self.clean_agence(item)
         item = self.clean_date_limite(item)
         item = self.clean_region(item)
         item = self.clean_distanciel(item)
@@ -18,7 +19,7 @@ class FormationSimplonPipeline:
         item = self.clean_date_debut(item)
         item = self.clean_date_fin(item)
 
-        # item de la page francecompetences
+        # item des pages francecompetences
         item = self.clean_nsf_code(item)
         item = self.clean_nsf_nom(item)
         item = self.clean_formacode_code(item)
@@ -75,7 +76,20 @@ class FormationSimplonPipeline:
                 adapter["voie_acces"] = voie_temp
         return item
    
-    # Nettoyage pages sessions/session?
+    # Nettoyage pages sessions/session
+    def clean_agence(self, item):
+        adapter = ItemAdapter(item)
+        agence = adapter.get("agence")
+        agence_temp = []
+        if agence:
+            if agence != []:
+                for i in range(len(agence)):
+                    agence[i] = agence[i].strip()
+                    if agence[i]:
+                        agence_temp.append(agence[i])
+                adapter["agence"] = agence_temp
+        return item
+
     def clean_date_limite(self, item):
         adapter = ItemAdapter(item)
         date_limite = adapter.get("date_limite")
@@ -165,32 +179,12 @@ class FormationSimplonPipeline:
                 pass
             date_fin = re.findall(r'(\d+)', date_fin)
             date_fin = "".join(date_fin)
-            date_fin = f"{date_fin[:-6]}/{date_fin[-6:-4]}/{date_fin[-4:]}"
-            adapter["date_fin"] = date_fin
+            if len(date_fin)>6:
+                date_fin = f"{date_fin[:-6]}/{date_fin[-6:-4]}/{date_fin[-4:]}"
+                adapter["date_fin"] = date_fin
+            else:
+                adapter["date_fin"] = None
         return item
-
-    # def clean_date_fin(self, item):
-    #     adapter = ItemAdapter(item)
-    #     date_fin = adapter.get("date_fin")
-    #     if date_fin is not None:
-    #         date_fin = date_fin.replace("\xa0"," ")\
-    #             .replace("Janvier", "01").replace("janvier","01")\
-    #             .replace("Février", "02").replace("février", "02")\
-    #             .replace("Mars", "03").replace("mars", "03")\
-    #             .replace("Avril", "04").replace("avril", "04")\
-    #             .replace("Mai", "05").replace("mai", "05")\
-    #             .replace("Juin", "06").replace("juin", "06")\
-    #             .replace("Juillet","07").replace("juillet", "07")\
-    #             .replace("Août","08").replace("août", "08")\
-    #             .replace("Septembre","09").replace("septembre", "09")\
-    #             .replace("Octobre","10").replace("octobre", "10")\
-    #             .replace("Novembre","11").replace("novembre", "11")\
-    #             .replace("Décembre","12").replace("décembre", "12")
-    #         date_fin = re.findall(r'(\d+)', date_fin)[-3:]
-    #         date_fin = "/".join(date_fin)
-    #         adapter["date_fin"] = date_fin
-    #     return item
-
 
     # Nettoyage pages francecompetences    
     def clean_nsf_code(self, item):
@@ -199,7 +193,8 @@ class FormationSimplonPipeline:
         if nsf_code:
             if nsf_code != []:
                 for i in range(len(nsf_code)):
-                    nsf_code[i] = nsf_code.strip()
+                    nsf_code[i] = nsf_code[i].replace(":", "")
+                    nsf_code[i] = nsf_code[i].strip()
                 adapter["nsf_code"] = nsf_code
         return item
     
@@ -270,21 +265,22 @@ class FormationSimplonPipeline:
         if nsf_code_rs:
             if nsf_code_rs != []:
                 for i in range(len(nsf_code_rs)):
-                    nsf_code_rs[i] = nsf_code_rs.strip()
+                    nsf_code_rs[i] = nsf_code_rs[i].replace(":", "")
+                    nsf_code_rs[i] = nsf_code_rs[i].strip()
                 adapter["nsf_code"] = nsf_code_rs
         return item
     
     def clean_nsf_nom_rs(self, item):
         adapter = ItemAdapter(item)
-        nsf_nom_rs = adapter.get("nsf_nom_rs")
-        nsf_nom_rs_temp = []
-        if nsf_nom_rs:
-            if nsf_nom_rs != []:
-                for i in range(len(nsf_nom_rs)):
-                    nsf_nom_rs[i] = nsf_nom_rs[i].strip()
-                    if nsf_nom_rs[i]:
-                        nsf_nom_rs_temp.append(nsf_nom_rs[i])
-                adapter["nsf_nom_rs"] = nsf_nom_rs_temp
+        nsf_nom = adapter.get("nsf_nom_rs")
+        nsf_nom_temp = []
+        if nsf_nom:
+            if nsf_nom != []:
+                for i in range(len(nsf_nom)):
+                    nsf_nom[i] = nsf_nom[i].strip()
+                    if nsf_nom[i]:
+                        nsf_nom_temp.append(nsf_nom[i])
+                adapter["nsf_nom_rs"] = nsf_nom_temp
         return item
 
     def clean_formacode_code_rs(self, item):
