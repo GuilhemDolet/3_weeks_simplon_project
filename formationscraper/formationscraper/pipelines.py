@@ -24,6 +24,7 @@ class DatabasePipelineFormations :
         # Créer la table si elle n'existe pas
        
        ##### créer une connexion à la bdd postgre
+       from formationscraper.orm import session
        self.session=session
 
     def process_item(self, item, spider):
@@ -33,18 +34,27 @@ class DatabasePipelineFormations :
 
         #table formationsimplon
 
-        existing_formation = self.session.query(FormationsSimplon).filter_by(formation_id=item['formation_id']).first()
-        if existing_formation is not None :
-            formation=existing_formation
-        else : 
-            formation=FormationsSimplon(formation_id=item['formation_id'], formation_intitule = item['formation_intitule'], formation_rncp = item['formation_rncp'], formation_rs = item['formation_rs'], formation_reussite = item['formation_reussite'], session_sous_intitule = item['session_sous_intitule'], session_distanciel = item['session_distanciel'], session_alternance = item['session_alternance'], session_date_limite = item['session_date_limite'], session_date_debut = ['session_date_debut'], session_lieu = ['session_lieu'], session_niveau = ['session_niveau'])
-            self.session.add(formation)
-            session.commit()
+        # existing_formation = self.session.query(FormationsSimplon).filter_by(id_formation_unique=item['id_formation_unique']).first()
+        # if existing_formation is not None :
+        #     formation=existing_formation
+        # else : 
+        formation=FormationsSimplon(formation_id=item['formation_id'], formation_intitule = item['formation_intitule'], formation_rncp = item['formation_rncp'], formation_rs = item['formation_rs'], formation_reussite = item['formation_reussite'], session_sous_intitule = item['session_sous_intitule'], session_distanciel = item['session_distanciel'], session_alternance = item['session_alternance'], session_date_limite = item['session_date_limite'], session_date_debut = ['session_date_debut'], session_lieu = ['session_lieu'], session_duree = ['session_duree'], session_niveau = ['session_niveau'], session_region = ['session_region'])
+        self.session.add(formation)
+        self.session.commit()
+
+    def close_spider(self, spider):
+        # Fermer la connexion à la base de données
+        self.session.close() #
     
 class FormationscraperPipeline:
         
         def process_item(self, item, spider): # méthode qui fait appel à une autre méthode
-            item = self.cleaned_intitule(item) # appel de chaque méthode
+            self.cleaned_intitule(item) # appel de chaque méthode
+            self.cleaned_lieu(item)
+            self.cleaned_debut(item)
+            self.cleaned_duree(item)
+            self.cleaned_niveau(item)
+            self.cleaned_region(item)
             return item
         
 ###### nettoyage intitulé (saut de ligne)
@@ -53,6 +63,45 @@ class FormationscraperPipeline:
             intitule_raw = adapter.get('formation_intitule')
             intitule_cleaned = intitule_raw.strip()
             adapter['formation_intitule'] = str(intitule_cleaned)
+            return item
+        
+        def cleaned_lieu(self, item): 
+            print("lancement clean_lieu")
+            adapter = ItemAdapter(item)
+            lieu_raw = adapter.get('session_lieu')
+            lieu_raw = " ".join(lieu_raw)
+            lieu_raw = lieu_raw.strip()
+            lieu_raw = lieu_raw.replace('\n', '')
+            # lieu_cleaned = (' '.join(lieu_raw)).strip().replace('\n', '')
+            adapter['session_lieu'] = lieu_raw
+            return item
+                
+        def cleaned_debut(self, item): 
+            adapter = ItemAdapter(item)
+            debut_raw = adapter.get('session_date_debut')            
+            debut_cleaned = ' '.join(debut_raw).strip().replace('\n', '')
+            adapter['session_date_debut'] = debut_cleaned
+            return item
+        
+        def cleaned_duree(self, item): 
+            adapter = ItemAdapter(item)
+            duree_raw = adapter.get('session_duree')
+            duree_cleaned = ' '.join(duree_raw).strip().replace('\n', '')
+            adapter['session_duree'] = str(duree_cleaned)
+            return item
+        
+        def cleaned_niveau(self, item): 
+            adapter = ItemAdapter(item)
+            niveau_raw = adapter.get('session_niveau')
+            niveau_cleaned = ' '.join(niveau_raw).strip().replace('\n', '')
+            adapter['session_niveau'] = str(niveau_cleaned)
+            return item
+        
+        def cleaned_region(self, item): 
+            adapter = ItemAdapter(item)
+            region_raw = adapter.get('session_region')
+            region_cleaned = ' '.join(region_raw).strip().replace('\n', '')
+            adapter['session_region'] = str(region_cleaned)
             return item
 
 ###### nettoyage date (formatage date)

@@ -6,43 +6,48 @@ class FormationSpider(scrapy.Spider):
     name = "formationspider"
     allowed_domains = ["simplon.co", "www.francecompetences.fr"]
     start_urls = ["https://simplon.co/notre-offre-de-formation.html"]
-    custom_settings = {"ITEM_PIPELINES" : {
-    "formationscraper.pipelines.DatabasePipelineFormations": 200,
-    "formationscraper.pipelines.FormationscraperPipeline": 100
-    }}
+    # custom_settings = {"ITEM_PIPELINES" : {
+    # "formationscraper.pipelines.FormationscraperPipeline": 100,
+    # "formationscraper.pipelines.DatabasePipelineFormations": 200
+    
+    # }}
 
     def parse(self, response):
-
+        item = FormationscraperItem()
         formations_url = response.xpath('.//a[contains(text(), "Découvrez la formation")]/@href').getall()
         #liste avec tous les raccourcis permettant de reconnaître chaque lien vers une formation
-        for formation in formations_url:
-            yield scrapy.Request(formation, callback=self.parse_formation)
+        for url in formations_url:
+            formation_id = None  # Initialisation de la variable vide
+            match = re.search(r'\d+', url)  # Recherche du numéro dans l'URL
+
+            if match:
+                formation_id = match.group()
+                item['formation_id'] = formation_id
+            print(f"id: {formation_id}")
+            yield scrapy.Request(url, callback=self.parse_formation, meta={'item': item})
+
 
     def parse_formation(self, response):
         # on stocke les informations dans une variable "formation"
         # on ne yield pas pour pouvoir continuer de nourrir la variable dans la fonction suivante
 
-        item = FormationscraperItem()
+        item = response.meta['item']
 
         formation_intitule = response.xpath(".//h1/text()").get()
-        formation_rncp = response.xpath(".//a[contains(@href,'https://www.francecompetences.fr/recherche/rncp')]").get()
-        formation_rs = response.xpath(".//a[contains(@href,'https://www.francecompetences.fr/recherche/rs')]").get()
-        formation_reussite = response.xpath(".//b[contains(text(),'%')][1]").get()
-        element = response.xpath('.//a[contains(text(), "Sessions ouvertes")]')
-        formation_id = None #initialiser la variable vide
-
-        if element:
-            url = element[0].get('href') # on récupère l'URL de l'attribut href
-            match = re.search(r'\d+', url) # on recherche le numéro dans l'URL
-            if match:
-                formation_id = match.group()
+        formation_rncp = response.xpath(".//a[contains(@href,'https://www.francecompetences.fr/recherche/rncp')]/text()").get()
+        formation_rs = response.xpath(".//a[contains(@href,'https://www.francecompetences.fr/recherche/rs')]/text()").get()
+        formation_reussite = response.xpath(".//b[contains(text(),'%')][1]/text()").get()
 
         item['formation_intitule'] = formation_intitule
         item['formation_rncp'] = formation_rncp
         item['formation_rs']= formation_rs
         item['formation_reussite'] = formation_reussite
-        item['formation_id'] = formation_id
         
+        print(f"intitulé: {formation_intitule}")
+        print(f"rncp: {formation_rncp}")
+        print(f"rs: {formation_rs}")
+        print(f"reussite: {formation_reussite}")
+
         sessions_url = response.xpath(".//div[1]/a[contains(text(), 'Les sessions ouvertes')]/@href").getall()
         # session url pour aller sur les url correspondant aux dates et lieux des prochaines sessions de formation
         if sessions_url is not None :
@@ -69,11 +74,14 @@ class FormationSpider(scrapy.Spider):
             session_sous_intitule = sess.xpath(".//h2[@class='card-title']/text()").get()
             session_distanciel = True if (sess.xpath(".//a[contains(@href,'distanciel')]").get()) else False
             session_alternance = True if (sess.xpath(".//a[contains(@href,'https://simplon.co/i-apply?tags=alternance')]").get()) else False
-            session_date_limite = sess.xpath(".//div[contains(@class, 'date-bloc')]").get()
-            session_date_debut = sess.xpath(".//div[@class='card-session-info calendar']").get()
-            session_duree = sess.xpath("(//i[contains(@class,'material-icons')])[2]/parent::node()/text()[1]").get() 
-            session_lieu = sess.xpath("(//i[contains(@class,'material-icons')])[1]/parent::node()/text()[1]").get()
-            session_niveau = sess.xpath("(//i[contains(@class,'material-icons')])[4]/parent::node()/text()[1]").get()
+            session_date_limite = sess.xpath(".//div[contains(@class, 'date-bloc')]/@data-sort").get()
+            session_date_debut = sess.xpath(".//div[@class= 'card-session-info calendar']/text()").getall()
+            session_duree = sess.xpath(".//div[@class= 'card-session-info'][1]/text()").getall()
+            session_lieu = sess.xpath(".//div[contains(@class, 'card-content-tag-container')]/parent::*/text()").getall()
+            session_region = sess.xpath(".//div[@class= 'card-session-info'][2]/text()").getall()
+            session_niveau = sess.xpath(".//div[@class= 'card-session-info'][3]/text()").getall()
+            # région : //div[@class= 'card-session-info'][2]/text()
+            # région : //div[contains(@class, 'card-session-info')][3]/i/parent::*/text()
 
             item['session_sous_intitule'] = session_sous_intitule
             item['session_distanciel'] = session_distanciel
@@ -82,6 +90,21 @@ class FormationSpider(scrapy.Spider):
             item['session_date_debut'] = session_date_debut
             item['session_duree'] = session_duree
             item['session_lieu'] = session_lieu
+            item['session_region'] = session_region
             item['session_niveau'] = session_niveau
+
+
+             # Imprimer pour déboguer
+
+
+
+            print(f"distanciel: {session_distanciel}")
+            print(f"alt: {session_alternance}")
+            print(f"date limite: {session_date_limite}")
+            print(f"Date début: {session_date_debut}")
+            print(f"Durée: {session_duree}")
+            print(f"Lieu: {session_lieu}")
+            print(f"Niveau: {session_niveau}")
+
 
             yield item

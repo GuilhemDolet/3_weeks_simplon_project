@@ -1,3 +1,4 @@
+#une fois la DB créée sur Azure, lancer ce fichier une seule fois pour créer les tables
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from models import Base
