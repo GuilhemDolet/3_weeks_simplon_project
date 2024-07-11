@@ -1,62 +1,3 @@
-# import scrapy
-# from formationscraper.items import FormationscraperItem
-# import re
-
-# class FormationSpider(scrapy.Spider):
-#     name = "formationspider"
-#     allowed_domains = ["simplon.co"]
-#     start_urls = ["https://simplon.co/notre-offre-de-formation.html"]
-#     custom_settings = {
-#         "ITEM_PIPELINES": {
-#             "formationscraper.pipelines.DatabasePipelineFormation": 200,
-#             "formationscraper.pipelines.FormationscraperPipeline": 100
-#         }
-#     }
-
-#     def parse(self, response):
-#         formations_urls = response.xpath('.//a[contains(text(), "Découvrez la formation")]/@href').getall()
-
-#         for formation_url in formations_urls:
-#             yield scrapy.Request(response.urljoin(formation_url), callback=self.parse_formation)
-
-#     def parse_formation(self, response):
-#         item = FormationscraperItem()
-
-#         item['formation_intitule'] = response.xpath(".//h1/text()").get()
-#         item['formation_rncp'] = response.xpath(".//a[contains(@href,'https://www.francecompetences.fr/recherche/rncp')]/@href").get()
-#         item['formation_rs'] = response.xpath(".//a[contains(@href,'https://www.francecompetences.fr/recherche/rs')]/@href").get()
-#         item['formation_reussite'] = response.xpath(".//b[contains(text(),'%')][1]/text()").get()
-
-#         sessions_url = response.xpath('.//a[contains(text(), "Sessions ouvertes")]/@href').get()
-        
-#         yield scrapy.Request(response.urljoin(sessions_url), callback=self.parse_sessions_formation, meta={'item': item})
-
-#     def parse_sessions_formation(self, response):
-#         item = response.meta['item']
-#         blocs_sessions = response.xpath("//div[@class='smp-card']")
-
-#         for sess in blocs_sessions:
-#             session_sous_intitule = sess.xpath(".//h2[@class='card-title']/text()").get()
-#             session_distanciel = bool(sess.xpath(".//a[contains(@href,'distanciel')]"))
-#             session_alternance = bool(sess.xpath(".//a[contains(@href,'alternance')]"))
-#             session_date_limite = sess.xpath(".//div[contains(@class, 'date-bloc')]/text()").get()
-#             session_date_debut = sess.xpath(".//div[@class='card-session-info calendar']/text()").get()
-#             session_duree = sess.xpath("(//i[contains(@class,'material-icons')])[2]/parent::node()/text()[1]").get()
-#             session_lieu = sess.xpath("(//i[contains(@class,'material-icons')])[1]/parent::node()/text()[1]").get()
-#             session_niveau = sess.xpath("(//i[contains(@class,'material-icons')])[4]/parent::node()/text()[1]").get()
-
-#             item['sous-intitule'] = session_sous_intitule
-#             item['distanciel'] = session_distanciel
-#             item['alternance'] = session_alternance
-#             item['date_limite'] = session_date_limite
-#             item['date_debut'] = session_date_debut
-#             item['duree'] = session_duree
-#             item['lieu'] = session_lieu
-#             item['niveau'] = session_niveau
-
-#             yield item
-
-
 import scrapy
 from formationscraper.items import FormationscraperItem
 import re
@@ -103,8 +44,10 @@ class FormationSpider(scrapy.Spider):
         
         sessions_url = response.xpath(".//div[1]/a[contains(text(), 'Les sessions ouvertes')]/@href").get()
         # session url pour aller sur les url correspondant aux dates et lieux des prochaines sessions de formation
-
-        yield scrapy.Request(sessions_url, callback=self.parse_sessions_formation, meta={'item': item})
+        if sessions_url is not None :
+            yield scrapy.Request(sessions_url, callback=self.parse_sessions_formation, meta={'item': item})
+        else :
+            yield item
 
     def parse_sessions_formation(self, response):
         # voir comment parcourir une page dans une page tout en revenant sur la page principale après
