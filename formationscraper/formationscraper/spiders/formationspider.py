@@ -7,7 +7,7 @@ class FormationSpider(scrapy.Spider):
     allowed_domains = ["simplon.co", "www.francecompetences.fr"]
     start_urls = ["https://simplon.co/notre-offre-de-formation.html"]
     custom_settings = {"ITEM_PIPELINES" : {
-    "formationscraper.pipelines.DatabasePipelineFormation": 200,
+    "formationscraper.pipelines.DatabasePipelineFormations": 200,
     "formationscraper.pipelines.FormationscraperPipeline": 100
     }}
 
@@ -29,23 +29,25 @@ class FormationSpider(scrapy.Spider):
         formation_rs = response.xpath(".//a[contains(@href,'https://www.francecompetences.fr/recherche/rs')]").get()
         formation_reussite = response.xpath(".//b[contains(text(),'%')][1]").get()
         element = response.xpath('.//a[contains(text(), "Sessions ouvertes")]')
+        formation_id = None #initialiser la variable vide
 
-        # if element:
-        #     url = element[0].get('href') # on récupère l'URL de l'attribut href
-        #     match = re.search(r'\d+', url) # on recherche le numéro dans l'URL
-        #     if match:
-        #         formation_id = match.group()
+        if element:
+            url = element[0].get('href') # on récupère l'URL de l'attribut href
+            match = re.search(r'\d+', url) # on recherche le numéro dans l'URL
+            if match:
+                formation_id = match.group()
 
         item['formation_intitule'] = formation_intitule
         item['formation_rncp'] = formation_rncp
         item['formation_rs']= formation_rs
         item['formation_reussite'] = formation_reussite
-        # item['formation_id'] = formation_id
+        item['formation_id'] = formation_id
         
-        sessions_url = response.xpath(".//div[1]/a[contains(text(), 'Les sessions ouvertes')]/@href").get()
+        sessions_url = response.xpath(".//div[1]/a[contains(text(), 'Les sessions ouvertes')]/@href").getall()
         # session url pour aller sur les url correspondant aux dates et lieux des prochaines sessions de formation
         if sessions_url is not None :
-            yield scrapy.Request(sessions_url, callback=self.parse_sessions_formation, meta={'item': item})
+            for session in sessions_url:
+                yield scrapy.Request(session, callback=self.parse_sessions_formation, meta={'item': item})
         else :
             yield item
 
@@ -57,14 +59,14 @@ class FormationSpider(scrapy.Spider):
         # page 2 page des sessions ouvertes : exemple de page : https://simplon.co/i-apply/developpeur-web-et-web-mobile/11
         # lien vers la page 2 (sous-sous home) "//a[contains(text(), 'sessions ouvertes')]""
         item = response.meta['item']
-        blocs_sessions = response.xpath("//div[@class='smp-card']").getall() #permet de retourner le début de l'url dans la suite du for
+        blocs_sessions = response.xpath("//div[@class='smp-card']") #permet de retourner le début de l'url dans la suite du for
         # Récupérer l'item SimplonFormationItem depuis meta
         
         for sess in blocs_sessions : 
         # au lieu de nb session dire xpath du bloc : //div[@class='smp-card']
         # on stocke les informations dans plusieurs variables "session"
         # on ne yield pas pour pouvoir continuer de nourrir la variable dans la fonction suivante
-            session_sous_intitule = sess.xpath(".//h2[@class='card-title']").get()
+            session_sous_intitule = sess.xpath(".//h2[@class='card-title']/text()").get()
             session_distanciel = True if (sess.xpath(".//a[contains(@href,'distanciel')]").get()) else False
             session_alternance = True if (sess.xpath(".//a[contains(@href,'https://simplon.co/i-apply?tags=alternance')]").get()) else False
             session_date_limite = sess.xpath(".//div[contains(@class, 'date-bloc')]").get()
@@ -82,4 +84,4 @@ class FormationSpider(scrapy.Spider):
             item['session_lieu'] = session_lieu
             item['session_niveau'] = session_niveau
 
-        yield item
+            yield item
