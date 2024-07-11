@@ -23,7 +23,6 @@ class FormationSimplonItem(scrapy.Item):
     echelle_duree = scrapy.Field()    
     date_debut = scrapy.Field()
     date_fin = scrapy.Field()
-    date_test = scrapy.Field()
 
     titre = scrapy.Field()
     etat_registre = scrapy.Field()

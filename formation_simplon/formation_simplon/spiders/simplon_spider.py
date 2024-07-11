@@ -6,6 +6,11 @@ class SimplonSpiderSpider(scrapy.Spider):
     allowed_domains = ["simplon.co", "francecompetences.fr"]
     start_urls = ["https://simplon.co/notre-offre-de-formation.html#nos-formations0"]
 
+    custom_settings = {
+        'DUPEFILTER_CLASS': 'scrapy.dupefilters.BaseDupeFilter',
+        'COOKIES_ENABLED': False
+    }
+
     def parse(self, response):
         formations = response.xpath("//a[@class='btn btn-pricipale btn-formation' and contains(text(), 'Découvrez la formation')]")
         for formation in formations:
@@ -24,31 +29,43 @@ class SimplonSpiderSpider(scrapy.Spider):
         item["rs_url"] = response.xpath("//a[contains(@href, 'https://www.francecompetences.fr/recherche/rs/')]/@href").get()
 
         # # "route" vers registre rncp
-        # if item["rncp_url"] is not None:
+        # if item["rncp_url"]:
         #     yield response.follow(item["rncp_url"], meta={"item":item}, callback=self.parse_registre)
         # else:
         #     yield item
 
         # # "route" vers registre rs
-        # if item["rs_url"] is not None:
+        # if item["rs_url"]:
         #     yield response.follow(item["rs_url"], meta={"item":item}, callback=self.parse_registre_rs)
         # else:
         #     yield item
 
         # # "routes" intégrées vers registres rncp et rs
-        # if item["rncp_url"] is not None:
+        # if item["rncp_url"]:
         #     yield response.follow(item["rncp_url"], meta={"item":item}, callback=self.parse_registre)
-        # elif item["rs_url"] is not None:
+        # elif item["rs_url"]e:
         #     yield response.follow(item["rs_url"], meta={"item":item}, callback=self.parse_registre_rs)
         # else:
         #     yield item
 
-        # "route" sans francecompétences
+        # # "route" sans francecompétences
+        # session_page = response.xpath("//a[contains(text(),'Les sessions ouvertes')]/@href").get()
+        # if session_page:
+        #     yield response.follow(session_page, meta={"item":item}, callback=self.parse_page_sessions)
+        # else:
+        #     yield item
+
+        # "route" avec francecompétences
         session_page = response.xpath("//a[contains(text(),'Les sessions ouvertes')]/@href").get()
-        if session_page is not None:
+        if session_page:
             yield response.follow(session_page, meta={"item":item}, callback=self.parse_page_sessions)
         else:
-            yield item
+            if item["rncp_url"]:
+                yield response.follow(item["rncp_url"], meta={"item":item}, callback=self.parse_registre)
+            elif item["rs_url"]:
+                yield response.follow(item["rs_url"], meta={"item":item}, callback=self.parse_registre_rs)
+            else:
+                yield item    
 
     def parse_page_sessions(self, response):
         item = response.meta["item"]
@@ -57,7 +74,7 @@ class SimplonSpiderSpider(scrapy.Spider):
             session_item = FormationSimplonItem(item)
             item["agence"] = response.xpath("//div[@class='card-content']/text()").getall()
             session_url = session.xpath("./@href").get()
-            if session_url is not None:
+            if session_url:
                 yield response.follow(session_url, meta={"item":session_item}, callback=self.parse_session)
             else:
                 yield item
@@ -72,9 +89,15 @@ class SimplonSpiderSpider(scrapy.Spider):
         item["echelle_duree"] = response.xpath("//i[contains(text(), 'hourglass_empty')]/parent::div/text()").getall()
         item["date_debut"] = response.xpath("//div[@class='card-session-info calendar']/text()").getall()
         item["date_fin"] = response.xpath("//strong[contains(text(), 'du') and contains(text(), 'au')]/text()").get()
-        item["date_test"] = response.xpath("//strong[contains(text(), 'du') and contains(text(), 'au')]/text()").get()
-        # item["date_test"] = response.xpath("//strong[contains(text(), 'Dates de la formation')]/text()").get()
-        yield item
+        
+        if item["rncp_url"]:
+            yield response.follow(item["rncp_url"], meta={"item":item}, callback=self.parse_registre)
+        elif item["rs_url"]:
+            yield response.follow(item["rs_url"], meta={"item":item}, callback=self.parse_registre_rs)
+        else:
+            yield item
+
+        # yield item
         
  
     # # # mtéhode rncp sans rs
