@@ -48,14 +48,14 @@ class SimplonSpiderSpider(scrapy.Spider):
         # else:
         #     yield item
 
-        # # "route" sans francecompétences
+        # # "route" page sessions sans francecompétences
         # session_page = response.xpath("//a[contains(text(),'Les sessions ouvertes')]/@href").get()
         # if session_page:
         #     yield response.follow(session_page, meta={"item":item}, callback=self.parse_page_sessions)
         # else:
         #     yield item
 
-        # "route" avec francecompétences
+        # "route" page sessions avec francecompétences
         session_page = response.xpath("//a[contains(text(),'Les sessions ouvertes')]/@href").get()
         if session_page:
             yield response.follow(session_page, meta={"item":item}, callback=self.parse_page_sessions)
@@ -80,8 +80,7 @@ class SimplonSpiderSpider(scrapy.Spider):
                 yield item
 
     def parse_session(self, response):
-        item = response.meta["item"] 
-        # item = FormationSimplonItem()   
+        item = response.meta["item"]   
         item["date_limite"] = response.xpath("//div[@class='date-bloc']/div/text()").getall()
         item["region"] = response.xpath("//i[contains(text(), 'location_on')]/parent::div/text()").getall()
         item["distanciel"] = response.xpath("//strong[contains(text(), '100%')]/text()").get()
@@ -95,38 +94,35 @@ class SimplonSpiderSpider(scrapy.Spider):
         elif item["rs_url"]:
             yield response.follow(item["rs_url"], meta={"item":item}, callback=self.parse_registre_rs)
         else:
-            yield item
-
-        # yield item
-        
+            yield item        
  
     # # # mtéhode rncp sans rs
     # def parse_registre(self, response):
     #     item = response.meta["item"]
-    #     item["titre"] = response.xpath("//h1/text()").get()
-    #     item["etat_registre"] = response.xpath("//span[contains(text(), 'Etat')]/following-sibling::span/text()").get()
-    #     item["nsf_code"] = response.xpath("//p[contains(text(),'NSF')]/following-sibling::div/p/span/text()").getall()
-    #     item["nsf_nom"] = response.xpath("//p[contains(text(),'NSF')]/following-sibling::div/p/text()").getall()    
-    #     item["formacode_code"] = response.xpath("//p[contains(text(),'Formacode')]/following-sibling::div/p/span/text()").getall()
-    #     item["formacode_nom"] = response.xpath("//p[contains(text(),'Formacode')]/following-sibling::div/p/text()").getall()
-    #     item["niveau_sortie"] = response.xpath("//p[contains(text(),'Nomenclature')]/following-sibling::div//span/text()").get()
-    #     item["certificateur_nom"] = response.xpath("//button[contains(text(),'Certificateur(s)')]/parent::div//td/text()").getall()[0]
-    #     item["siret"] = response.xpath("//button[contains(text(),'Certificateur(s)')]/parent::div//td/text()").getall()[1]
+    #     item["titre_rncp"] = response.xpath("//h1/text()").get()
+    #     item["statut_registre_rncp"] = response.xpath("//span[contains(text(), 'Etat')]/following-sibling::span/text()").get()
+    #     item["nsf_code_rncp"] = response.xpath("//p[contains(text(),'NSF')]/following-sibling::div/p/span/text()").getall()
+    #     item["nsf_nom_rncp"] = response.xpath("//p[contains(text(),'NSF')]/following-sibling::div/p/text()").getall()    
+    #     item["formacode_code_rncp"] = response.xpath("//p[contains(text(),'Formacode')]/following-sibling::div/p/span/text()").getall()
+    #     item["formacode_nom_rncp"] = response.xpath("//p[contains(text(),'Formacode')]/following-sibling::div/p/text()").getall()
+    #     item["niveau_sortie_rncp"] = response.xpath("//p[contains(text(),'Nomenclature')]/following-sibling::div//span/text()").get()
+    #     item["certificateur_nom_rncp"] = response.xpath("//button[contains(text(),'Certificateur(s)')]/parent::div//td/text()").getall()[0]
+    #     item["siret_rncp"] = response.xpath("//button[contains(text(),'Certificateur(s)')]/parent::div//td/text()").getall()[1]
 
     #     yield item
 
     # mtéhode rncp avec rs
     def parse_registre(self, response):
         item = response.meta["item"]
-        item["titre"] = response.xpath("//h1/text()").get()
-        item["etat_registre"] = response.xpath("//span[contains(text(), 'Etat')]/following-sibling::span/text()").get()
-        item["nsf_code"] = response.xpath("//p[contains(text(),'NSF')]/following-sibling::div/p/span/text()").getall()
-        item["nsf_nom"] = response.xpath("//p[contains(text(),'NSF')]/following-sibling::div/p/text()").getall()    
-        item["formacode_code"] = response.xpath("//p[contains(text(),'Formacode')]/following-sibling::div/p/span/text()").getall()
-        item["formacode_nom"] = response.xpath("//p[contains(text(),'Formacode')]/following-sibling::div/p/text()").getall()
-        item["niveau_sortie"] = response.xpath("//p[contains(text(),'Nomenclature')]/following-sibling::div//span/text()").get()
-        item["certificateur_nom"] = response.xpath("//button[contains(text(),'Certificateur(s)')]/parent::div//td/text()").getall()[0]
-        item["siret"] = response.xpath("//button[contains(text(),'Certificateur(s)')]/parent::div//td/text()").getall()[1]
+        item["titre_rncp"] = response.xpath("//h1/text()").get()
+        item["statut_registre_rncp"] = response.xpath("//span[contains(text(), 'Etat')]/following-sibling::span/text()").get()
+        item["nsf_code_rncp"] = response.xpath("//p[contains(text(),'NSF')]/following-sibling::div/p/span/text()").getall()
+        item["nsf_nom_rncp"] = response.xpath("//p[contains(text(),'NSF')]/following-sibling::div/p/text()").getall()    
+        item["formacode_code_rncp"] = response.xpath("//p[contains(text(),'Formacode')]/following-sibling::div/p/span/text()").getall()
+        item["formacode_nom_rncp"] = response.xpath("//p[contains(text(),'Formacode')]/following-sibling::div/p/text()").getall()
+        item["niveau_sortie_rncp"] = response.xpath("//p[contains(text(),'Nomenclature')]/following-sibling::div//span/text()").get()
+        item["certificateur_nom_rncp"] = response.xpath("//button[contains(text(),'Certificateur(s)')]/parent::div//td/text()").getall()[0]
+        item["siret_rncp"] = response.xpath("//button[contains(text(),'Certificateur(s)')]/parent::div//td/text()").getall()[1]
         if item["code_rs"]:
             yield scrapy.Request(item["rs_url"], meta={"item":item}, callback=self.parse_registre_rs)
         else:    
@@ -135,7 +131,7 @@ class SimplonSpiderSpider(scrapy.Spider):
     def parse_registre_rs(self, response):
         item = response.meta["item"]
         item["titre_rs"] = response.xpath("//h1/text()").get()
-        item["etat_registre_rs"] = response.xpath("//span[contains(text(), 'Etat')]/following-sibling::span/text()").get()
+        item["statut_registre_rs"] = response.xpath("//span[contains(text(), 'Etat')]/following-sibling::span/text()").get()
         item["nsf_code_rs"] = response.xpath("//p[contains(text(),'NSF')]/following-sibling::div/p/span/text()").getall()
         item["nsf_nom_rs"] = response.xpath("//p[contains(text(), 'NSF')]/following-sibling::div/p/text()").getall()
         item["formacode_code_rs"] = response.xpath("//p[contains(text(),'Formacode')]/following-sibling::div/p/span/text()").getall()
