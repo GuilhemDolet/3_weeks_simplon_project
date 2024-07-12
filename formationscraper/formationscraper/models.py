@@ -27,3 +27,8 @@ class FormationsSimplon(Base):
     session_lieu = Column(String, nullable=True)
     session_region = Column(String, nullable=True)
     session_niveau = Column(String, nullable=True)
+    
+    
+
+
+    

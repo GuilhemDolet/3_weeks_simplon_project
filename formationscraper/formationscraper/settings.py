@@ -1,3 +1,4 @@
+import random
 # Scrapy settings for formationscraper project
 #
 # For simplicity, this file contains only settings considered important or
@@ -25,8 +26,8 @@ ROBOTSTXT_OBEY = False
 # Configure a delay for requests for the same website (default: 0)
 # See https://docs.scrapy.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
-DOWNLOAD_DELAY = 1
-RANDOMIZE_DOWNLOAD_DELAY = True # entre 0.5 et 1.5 secondes
+DOWNLOAD_DELAY = random.uniform(0.5, 1)
+RANDOMIZE_DOWNLOAD_DELAY = True
 
 # The download delay setting will honor only one of:
 #CONCURRENT_REQUESTS_PER_DOMAIN = 16
@@ -65,9 +66,11 @@ DEFAULT_REQUEST_HEADERS = {
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-   "formationscraper.pipelines.DatabasePipelineFormations": 300,
-   "formationscraper.pipelines.FormationscraperPipeline": 100
-    }
+   "formationscraper.pipelines.FormationscraperPipeline": 100, 
+   "formationscraper.pipelines.DatabasePipelineFormations": 200,
+
+
+}
 
 
 # Enable and configure the AutoThrottle extension (disabled by default)
