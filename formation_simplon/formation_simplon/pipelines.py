@@ -1,5 +1,76 @@
 from itemadapter import ItemAdapter
+from formation_simplon.models import Nsf, FormationsExt, FormationsSimplon, Registres, AssFormationsSimplonRegistres, AssRegistresFormacodes, AssRegistresNsf, SessionsSimplon, Regions, AssFormationsExtRegistres, AssFormationsExtRegions
 import re
+
+
+
+class DatabasePipelineFormations :
+
+    def open_spider(self, spider):
+        # Se connecter à la base de données
+        # Créer la table si elle n'existe pas
+       
+       ##### créer une connexion à la bdd postgre
+       from formation_simplon.orm import session
+       self.session=session
+
+    def process_item(self, item, spider):
+        print(f" Processing item:{item}")
+        # Insérer les données dans la base de données :
+        # - règle pour vérifier l'existence de l'entité dans la table correspondante
+        # - ajout de l'entité
+
+        #table formationsimplon
+
+        # existing_formation = self.session.query(FormationsSimplon).filter_by(id_formation_unique=item['id_formation_unique']).first()
+        # if existing_formation is not None :
+        #     formation=existing_formation
+        # else : 
+    
+        # Ajouter d'autres étapes de nettoyage si nécessaire
+
+        formation=FormationsSimplon(formation_intitule=item['intitule_formation'],
+                                    categorie=item['categorie'],
+                                    voie_acces=item['voie_acces'])
+        
+        sessionssimplon=SessionsSimplon(agence=item['agence'],
+                            distanciel=item['distanciel'],
+                            alternance=item['alternance'],
+                            echelle_duree=item['echelle_duree'],
+                            date_limite=item['date_limite'],
+                            date_debut=item['date_debut'],
+                            date_fin=item['date_fin'])
+        
+        registre=Registres(code_registre=item['code_registre'],
+                        type_registre = "RS" if item['code_registre'].startswith("RS") else "RNCP",
+                        titre=item['titre_rs'] if item['titre_rs'] is not None else item['titre_rncp'])
+
+        formations_simplon=FormationsSimplon(id_formation=item['formation_id'],
+                                                intitule_formation=item['intitule_formation'],
+                                                categorie=item['categorie'],
+                                                voie_acces=item['voie_acces'])
+        
+        regions=Regions(regions=item['region'])
+        
+        nsf=Nsf(id_formation=item['formation_id'],
+                intitule_formation=item['intitule_formation'])
+        
+        formationext=FormationsExt(formation_intitule=item['intitule_formation'],
+                                categorie=item['categorie'],
+                                voie_acces=item['voie_acces'])
+
+
+        self.session.add(formation, sessionssimplon, registre, formations_simplon, regions, nsf, formationext)
+        self.session.commit()
+        print(f"inserted formation with ID : {item['formation_id']}")
+        return item
+
+    def close_spider(self, spider):
+        # Fermer la connexion à la base de données
+        self.session.close() #
+
+
+
 
 class FormationSimplonPipeline:
     def process_item(self, item, spider):

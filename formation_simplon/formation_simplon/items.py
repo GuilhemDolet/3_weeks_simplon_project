@@ -33,7 +33,7 @@ class FormationSimplonItem(scrapy.Item):
     niveau_sortie_rncp = scrapy.Field()
     certificateur_nom_rncp = scrapy.Field()
     siret_rncp = scrapy.Field()
-    rncp_url =scrapy.Field()
+    rncp_url = scrapy.Field()
 
     titre_rs = scrapy.Field()
     statut_registre_rs = scrapy.Field()
