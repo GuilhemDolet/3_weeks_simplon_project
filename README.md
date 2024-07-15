@@ -4,18 +4,18 @@ title: Simplon
 ---
 
 erDiagram
-    formations {
+    Formations_simplon {
         int id_formation PK
         string intitule_formation
         string catagorie
         string voie_acces
     }
-    formations_ext{
+    Formations_ext{
         int id_formation PK
         string intitule_formation
-        string orgisme
+        string organisme
     }
-    sessions {
+    Sessions {
         int id_session PK
         string agence
         bool distanciel
@@ -27,61 +27,61 @@ erDiagram
         int id_formation FK
         string region FK
     }
-    regions {
+    Regions {
         string region PK
     }
-    registres {
+    Registres {
         string type_registre PK
         int code_registre PK
         string titre
         string statut
         string niveau_sortie
-        blob url
+        url url
     }
-    nsf {
+    Nsf {
         int nsf_code PK
         string nsf_nom
     }
-    formacodes {
+    Formacodes {
         int formacode_code PK
         string formacode_nom
     }
-    ass_formation_registre {
-        int id_formaion PK, FK
+    Ass_formations_simplon_registres {
+        int id_formation PK, FK
         string type_registre PK, FK
         int code_registre PK, FK
     }
-    ass_formation_ext_registre {
-        int id_formaion PK, FK
+    Ass_formations_ext_registres {
+        int id_formation PK, FK
         string type_registre PK, FK
         int code_registre PK, FK
     }
-    ass_registre_nsf {
+    Ass_registres_nsf {
         int nsf_code PK, FK
         string type_registre PK, FK
         int code_registre PK, FK
     }
-    ass_registre_formacode {
+    Ass_registres_formacodes {
         int formacode_code PK, FK
         string type_registre PK, FK
         int code_registre PK, FK
     }
-    ass_formation_ext_region {
+    Ass_formations_ext_regions {
         int id_formation PK, FK
         string region PK, FK
     }
 
-    registres ||--|{ ass_registre_nsf : a
-    ass_registre_nsf }|--|| nsf : a
-    registres ||--|{ ass_registre_formacode : a
-    ass_registre_formacode }|--|| formacodes : a
-    registres ||--|{ ass_formation_registre : a
-    ass_formation_registre }|--|| formations : a
-    registres ||--|{ ass_formation_ext_registre : a
-    ass_formation_ext_registre }|--|| formations_ext : a 
-    formations ||--o{ sessions : a    
-    sessions }|--|| regions: a
-    formations_ext ||--|{ ass_formation_ext_region : a
-    regions ||--|{ ass_formation_ext_region : a 
+    Registres ||--|{ Ass_registres_nsf : a
+    Ass_registres_nsf }|--|| Nsf : a
+    Registres ||--|{ Ass_registres_formacodes : a
+    Ass_registres_formacodes }|--|| Formacodes : a
+    Registres ||--|{ Ass_formations_simplon_registres : a
+    Ass_formations_simplon_registres }|--|| Formations_simplon : a
+    Registres ||--|{ Ass_formations_ext_registres : a
+    Ass_formations_ext_registres }|--|| Formations_ext : a 
+    Formations_simplon ||--o{ Sessions : a    
+    Sessions }|--|| Regions: a
+    Formations_ext ||--|{ Ass_formations_ext_regions : a
+    Regions ||--|{ Ass_formations_ext_regions : a 
 
 ```
