@@ -1,5 +1,6 @@
 from itemadapter import ItemAdapter
 import re
+import dateparser
 
 class FormationSimplonPipeline:
     def process_item(self, item, spider):
@@ -98,6 +99,7 @@ class FormationSimplonPipeline:
                 date_limite = ";".join(date_limite)
                 date_limite = re.findall(r'(\d+)', date_limite)
                 date_limite = "/".join(date_limite)
+                date_limite = dateparser.parse(date_limite).date()
                 adapter["date_limite"] = date_limite
         return item
     
@@ -153,6 +155,7 @@ class FormationSimplonPipeline:
                 date_debut = "".join(date_debut)
                 date_debut = re.findall(r'\d+/?', date_debut)
                 date_debut = "".join(date_debut)
+                date_debut = dateparser.parse(date_debut).date()
                 adapter["date_debut"] = date_debut
         return item
     
@@ -181,6 +184,7 @@ class FormationSimplonPipeline:
             date_fin = "".join(date_fin)
             if len(date_fin)>6:
                 date_fin = f"{date_fin[:-6]}/{date_fin[-6:-4]}/{date_fin[-4:]}"
+                date_fin = dateparser.parse(date_fin).date()
                 adapter["date_fin"] = date_fin
             else:
                 adapter["date_fin"] = None
@@ -322,3 +326,5 @@ class FormationSimplonPipeline:
             siret = int(siret)
             adapter["siret_rs"] = siret
         return item
+    
+
