@@ -1,8 +1,9 @@
 from itemadapter import ItemAdapter
 from formation_simplon.models import Nsf, FormationsExt, FormationsSimplon, Registres, AssFormationsSimplonRegistres, AssRegistresFormacodes, AssRegistresNsf, SessionsSimplon, Regions, AssFormationsExtRegistres, AssFormationsExtRegions
 import re
-
-
+import os
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 
 class DatabasePipelineFormations :
 
@@ -11,8 +12,9 @@ class DatabasePipelineFormations :
         # Créer la table si elle n'existe pas
        
        ##### créer une connexion à la bdd postgre
-       from formation_simplon.orm import session
-       self.session=session
+       DATABASE_URL2=os.environ.get('DATABASE_URL3')
+       engine = create_engine(DATABASE_URL2)
+       self.session=sessionmaker(bing=engine)
 
     def process_item(self, item, spider):
         print(f" Processing item:{item}")
@@ -29,47 +31,46 @@ class DatabasePipelineFormations :
     
         # Ajouter d'autres étapes de nettoyage si nécessaire
 
-        formation=FormationsSimplon(formation_intitule=item['intitule_formation'],
-                                    categorie=item['categorie'],
-                                    voie_acces=item['voie_acces'])
+        formations=FormationsSimplon(formation_intitule=item['intitule_formation'],
+            categorie=item['categorie'],
+            voie_acces=item['voie_acces'])
         
         sessionssimplon=SessionsSimplon(agence=item['agence'],
-                            distanciel=item['distanciel'],
-                            alternance=item['alternance'],
-                            echelle_duree=item['echelle_duree'],
-                            date_limite=item['date_limite'],
-                            date_debut=item['date_debut'],
-                            date_fin=item['date_fin'])
+            distanciel=item['distanciel'],
+            alternance=item['alternance'],
+            echelle_duree=item['echelle_duree'],
+            date_limite=item['date_limite'],
+            date_debut=item['date_debut'],
+            date_fin=item['date_fin'])
         
-        registre=Registres(code_registre=item['code_registre'],
-                        type_registre = "RS" if item['code_registre'].startswith("RS") else "RNCP",
-                        titre=item['titre_rs'] if item['titre_rs'] is not None else item['titre_rncp'])
+        registres=Registres(code_registre=item['code_registre'],
+            type_registre = "RS" if item['code_registre'].startswith("RS") else "RNCP",
+            titre=item['titre_rs'] if item['titre_rs'] is not None else item['titre_rncp'])
 
         formations_simplon=FormationsSimplon(id_formation=item['formation_id'],
-                                                intitule_formation=item['intitule_formation'],
-                                                categorie=item['categorie'],
-                                                voie_acces=item['voie_acces'])
+            intitule_formation=item['intitule_formation'],
+            categorie=item['categorie'],
+            voie_acces=item['voie_acces'])
         
         regions=Regions(regions=item['region'])
         
         nsf=Nsf(id_formation=item['formation_id'],
-                intitule_formation=item['intitule_formation'])
+            intitule_formation=item['intitule_formation'])
         
-        formationext=FormationsExt(formation_intitule=item['intitule_formation'],
-                                categorie=item['categorie'],
-                                voie_acces=item['voie_acces'])
+        formationsext=FormationsExt(formation_intitule=item['intitule_formation'],
+            categorie=item['categorie'],
+            voie_acces=item['voie_acces'])
 
 
-        self.session.add(formation, sessionssimplon, registre, formations_simplon, regions, nsf, formationext)
+        self.session.add_all(formations, sessionssimplon, registres, formations_simplon, regions, nsf, formationsext)
         self.session.commit()
+
         print(f"inserted formation with ID : {item['formation_id']}")
         return item
 
     def close_spider(self, spider):
         # Fermer la connexion à la base de données
         self.session.close() #
-
-
 
 
 class FormationSimplonPipeline:

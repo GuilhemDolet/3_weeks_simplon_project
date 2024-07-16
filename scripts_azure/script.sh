@@ -1,7 +1,8 @@
 # avoir installé Azure Cli
 # se logger avec azure cli dans cet environnement
 # ACTIVER LE SCRIPT "chmod +x script.sh" pour rendre le script exécutable
-# EXECUTER LE SCRIPT avec ./ nomduscript.sh
+# EXECUTER LE SCRIPT avec /scripts_azure 
+# puis . script.sh
 
 # charger les variables d'environnement
  set -o allexport #suprime toutes les variables importées avant celle la

@@ -1,16 +1,18 @@
 #une fois la DB créée sur Azure, lancer ce fichier une seule fois pour créer les tables
-from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import declarative_base, relationship
+from sqlalchemy import create_engine
 from models import Base
-from dotenv import load_dotenv
 import os
+import sqlite3
 
-load_dotenv()
 # Définir la connexion à la base de données
-DATABASE_URL = os.getenv("DATABASE_URL") 
+DATABASE_URL2=os.environ.get('DATABASE_URL3')
+print(DATABASE_URL2)
+
 
 # Créer une instance du moteur SQLAlchemy
-engine = create_engine(DATABASE_URL)
+engine = create_engine(DATABASE_URL2)
 
 # Créer une factory de sessions SQLAlchemy (générateur de sessions)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
