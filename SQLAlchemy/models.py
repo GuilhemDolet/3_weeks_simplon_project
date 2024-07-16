@@ -2,7 +2,7 @@ from sqlalchemy import create_engine, Column, Integer, String, Date, Boolean, Fl
 from sqlalchemy.orm import relationship, declarative_base
 
 Base = declarative_base()
-
+engine = create_engine('sqlite:///simplon_bdd.db')
 
 #-------------------------- TABLE ASSOCIATIONS -----------------------#
 
@@ -84,7 +84,7 @@ class Formacodes(Base):
 
 class FormationsExt(Base):
     __tablename__ = 'formations_ext'
-    id_formation = Column(Integer, primary_key=True, nullable=False)
+    id_formation = Column(Integer, primary_key=True, autoincrement=True, nullable=False)
     intitule_formation = Column(String)
     organisme = Column(String)
 
@@ -96,7 +96,7 @@ class FormationsExt(Base):
 
 class FormationsSimplon(Base):
     __tablename__ = 'formations_simplon'
-    id_formation = Column(Integer, primary_key=True, nullable=False)
+    id_formation = Column(Integer, primary_key=True, autoincrement=True, nullable=False)
     intitule_formation = Column(String)
     categorie = Column(String)
     voie_acces = Column(String)
@@ -109,7 +109,7 @@ class FormationsSimplon(Base):
 
 class Sessions(Base):
     __tablename__ = 'sessions'
-    id_session = Column(Integer, primary_key=True, nullable=False)
+    id_session = Column(Integer, primary_key=True, autoincrement=True, nullable=False)
     agence = Column(String)
     distanciel = Column(Boolean)
     alternance = Column(Boolean)
@@ -139,5 +139,5 @@ class Regions(Base):
 
 
 if "__main__" == __name__:
-    engine = create_engine('sqlite:///simplon_bdd.db')
+    
     Base.metadata.create_all(engine)
