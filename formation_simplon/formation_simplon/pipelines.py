@@ -1,5 +1,9 @@
 from itemadapter import ItemAdapter
+from sqlalchemy.orm import sessionmaker
+from formation_simplon.model_bdd.models import engine, Registres
 import re
+from sqlalchemy.exc import IntegrityError
+from scrapy.exceptions import DropItem
 
 class FormationSimplonPipeline:
     def process_item(self, item, spider):
@@ -322,3 +326,42 @@ class FormationSimplonPipeline:
             siret = int(siret)
             adapter["siret_rs"] = siret
         return item
+    
+
+class DatabasePipeline:
+    def __init__(self):
+        self.Session = sessionmaker(bind=engine, autoflush=False)
+    
+    def process_item(self, item, spider):
+        session = self.Session()
+
+        # Table Registres
+        # Check si on récupère un code RNCP ou un code RS
+        if item.get('code_rncp'):
+
+        # Check si la ligne existe déjà en filtrant par la clés primaire code_registre
+            exist_registre = session.query(Registres).filter_by(code_registre=item.get('code_rncp')).first()
+            # Si le registre n'existe pas, on l'ajoute
+            if exist_registre is None: 
+                registre = Registres(
+                    type_registre = 'RNCP',
+                    code_registre = item.get('code_rncp'),
+                    titre = item.get('titre_rncp'),
+                    statut = item.get('statut_registre_rncp'),
+                    niveau_sortie = item.get('niveau_sortie_rncp'),
+                    url = item.get('rncp_url'),
+                )
+                session.add(registre)
+                try:
+                    session.commit()
+                except IntegrityError as e:
+                    session.rollback()
+                    print(f"Error saving item due to integrity error: {e}")
+                    raise DropItem(f"Error saving item due to integrity error: {e}")
+                except Exception as e:
+                    session.rollback()
+                    print(f"Error processing item: {e}")
+                    raise DropItem(f"Error processing item: {e}")
+                finally:
+                    session.close()
+          

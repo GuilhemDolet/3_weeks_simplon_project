@@ -64,7 +64,9 @@ DEFAULT_REQUEST_HEADERS = {
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-   "formation_simplon.pipelines.FormationSimplonPipeline": 300,
+   "formation_simplon.pipelines.FormationSimplonPipeline": 100,
+   "formation_simplon.pipelines.DatabasePipeline": 200,
+
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
