@@ -468,4 +468,6 @@ class Database:
 
     def close_spider(self, spider):
         self.session.close()
-       
+
+class CompteFormationDatabase:
+    pass
