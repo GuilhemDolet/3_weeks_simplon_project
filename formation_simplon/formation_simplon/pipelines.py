@@ -2,8 +2,25 @@ from itemadapter import ItemAdapter
 from sqlalchemy.orm import sessionmaker
 from formation_simplon.model_bdd.models import engine, Registres
 import re
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import sessionmaker, declarative_base
+from sqlalchemy import create_engine
 from scrapy.exceptions import DropItem
+from sqlalchemy.exc import IntegrityError 
+from .models import Base
+# from .models import FormationsSimplon, FormationsExt, SessionsFormations, Regions, Registres, Nsf, Formacodes
+# from .models import AssFormationsRegistres, AssFormationsExtRegistres, AssRegistresNsf, AssRegistresFormacodes, AssRegionsFormationsExt
+from .models import FormationsSimplon
+# from .models import FormationsExt
+from .models import Regions
+from .models import Registres
+# from .models import Nsf
+# from .models import Formacodes
+# from .models import AssFormationsRegistres
+# from .models import AssFormationsExtRegistres
+# from .models import AssRegistresNsf
+# from .models import AssRegistresFormacodes
+# from .models import AssRegionsFormationsExt
+
 
 class FormationSimplonPipeline:
     def process_item(self, item, spider):
@@ -327,41 +344,128 @@ class FormationSimplonPipeline:
             adapter["siret_rs"] = siret
         return item
     
-
-class DatabasePipeline:
+class Database:
     def __init__(self):
-        self.Session = sessionmaker(bind=engine, autoflush=False)
-    
+        engine = create_engine('sqlite:///mydatabase.db')
+        Base.metadata.create_all(engine)
+        Session = sessionmaker(bind=engine)
+        self.session = Session()
+        
     def process_item(self, item, spider):
-        session = self.Session()
+        # table formations_simplon
+        intitule = item.get("intitule_formation", None)
+        categ = item.get("categorie", None)
+        existing_formation = self.session.query(FormationsSimplon).filter_by(intitule_formation=intitule, categorie=categ).first()
+        if existing_formation:
+            formation = existing_formation
+        elif intitule is not None and categ is not None:
+            formation = FormationsSimplon(intitule_formation=item['intitule_formation'], categorie=item['categorie'])
+            self.session.add(formation)
+            self.session.commit()
 
-        # Table Registres
-        # Check si on récupère un code RNCP ou un code RS
-        if item.get('code_rncp'):
+        # table sessions
+        
+        # session_formation = SessionsFormations(agence=item['agence'],
+        #     distanciel=item['distanciel'],
+        #     alternance=item['alternance'],
+        #     echelle_duree=item['echelle_duree'],
+        #     date_limite=item['date_limite'],
+        #     date_debut=item['date_debut'],
+        #     date_fin=item['date_fin'],
+        #     id_formation=item['id_formation'],
+        #     region=item['region'])
 
-        # Check si la ligne existe déjà en filtrant par la clés primaire code_registre
-            exist_registre = session.query(Registres).filter_by(code_registre=item.get('code_rncp')).first()
-            # Si le registre n'existe pas, on l'ajoute
-            if exist_registre is None: 
-                registre = Registres(
-                    type_registre = 'RNCP',
-                    code_registre = item.get('code_rncp'),
-                    titre = item.get('titre_rncp'),
-                    statut = item.get('statut_registre_rncp'),
-                    niveau_sortie = item.get('niveau_sortie_rncp'),
-                    url = item.get('rncp_url'),
-                )
-                session.add(registre)
-                try:
-                    session.commit()
-                except IntegrityError as e:
-                    session.rollback()
-                    print(f"Error saving item due to integrity error: {e}")
-                    raise DropItem(f"Error saving item due to integrity error: {e}")
-                except Exception as e:
-                    session.rollback()
-                    print(f"Error processing item: {e}")
-                    raise DropItem(f"Error processing item: {e}")
-                finally:
-                    session.close()
-          
+       # table regions 
+        reg = item.get("region", None)
+        existing_region = self.session.query(Regions).filter_by(region=reg).first()
+        if existing_region:
+            region = existing_region
+        elif reg is not None:
+            region = Regions(region=item['region'])
+            self.session.add(region)
+            # self.session.flush()
+            self.session.commit()
+
+        # table registres
+        type = item.get("rncp_url", None)
+        if type:
+            type = re.findall(r'/([a-zA-Z]+)/\d+', type)[0]
+            type = type.upper()
+        else:
+            type = None
+
+        ref = item.get("code_rncp", None)
+        existing_registre = self.session.query(Registres).filter_by(type_registre=type, code_registre=ref).first()
+        if existing_registre:
+            registre = existing_registre
+        elif type is not None and ref is not None:
+            registre = Registres(type_registre=type, 
+                        code_registre=item['code_rncp'],
+                        titre_registre=item['titre_rncp'],
+                        statut=item['statut_registre_rncp'],
+                        niveau_sortie=item['niveau_sortie_rncp'],
+                        url=item['rncp_url'])
+            self.session.add(registre)
+            # self.session.flush()
+            self.session.commit()
+
+        # solution try/except
+        # try:
+        #     existing_region = self.session.query(Regions).filter_by(region=item['region']).first()
+        #     if existing_region:
+        #         region = existing_region
+        #     else:
+        #         region = Regions(region=item['region'])
+        #         self.session.add(region)
+        #         # self.session.flush()
+        #         self.session.commit()
+
+        # except IntegrityError as e:
+        #     self.session.rollback()
+        #     print(f"Error saving item due to integrity error: {e}")
+        #     raise DropItem(f"Error saving item due to integrity error: {e}")
+        # except Exception as e:
+        #     self.session.rollback()
+        #     print(f"Error processing item: {e}")
+        #     raise DropItem(f"Error processing item: {e}")
+
+
+        # table regitres
+        # try:
+        #     type = item.get("rncp_url", None)
+        #     if type:
+        #         type = re.findall(r'/([a-zA-Z]+)/\d+', type)[0]
+        #         type = type.upper()
+        #     else:
+        #         type = None
+
+            # existing_registre = self.session.query(Registres).filter_by(type_registre=type, code_registre=item['code_rncp']).first()
+            # if existing_registre:
+            #     registre = existing_registre
+            # else:
+            #     registre = Registres(type_registre=type, 
+            #                 code_registre=item['code_rncp'],
+            #                 titre_registre=item['titre_rncp'],
+            #                 statut=item['statut_registre_rncp'],
+            #                 niveau_sortie=item['niveau_sortie_rncp'],
+            #                 url=item['rncp_url'])
+            #     self.session.add(registre)
+            #     # self.session.flush()
+            #     self.session.commit()
+
+        # except IntegrityError as e:
+        #     self.session.rollback()
+        #     print(f"Error saving item due to integrity error: {e}")
+        #     raise DropItem(f"Error saving item due to integrity error: {e}")
+        # except Exception as e:
+        #     self.session.rollback()
+        #     print(f"Error processing item: {e}")
+        #     raise DropItem(f"Error processing item: {e}")
+        # finally:
+        #     self.session.close()
+
+        return item
+
+    def close_spider(self, spider):
+        self.session.close()
+       
