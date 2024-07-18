@@ -70,9 +70,11 @@ class SimplonSpiderSpider(scrapy.Spider):
     def parse_page_sessions(self, response):
         item = response.meta["item"]
         sessions = response.xpath("//a[contains(text(),'Découvrez la session')]")
-        for session in sessions:
+        agences = response.xpath("//div[@class='card-content']/text()").getall()
+        agences=[i.strip() for i in agences if i.strip()]
+        for session,agence in zip(sessions,agences):
             session_item = FormationSimplonItem(item)
-            item["agence"] = response.xpath("//div[@class='card-content']/text()").getall()
+            session_item["agence"] = agence
             session_url = session.xpath("./@href").get()
             if session_url:
                 yield response.follow(session_url, meta={"item":session_item}, callback=self.parse_session)

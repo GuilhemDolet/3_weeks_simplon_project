@@ -1,5 +1,6 @@
 from itemadapter import ItemAdapter
 import re
+import dateparser
 from sqlalchemy.orm import sessionmaker, declarative_base
 from sqlalchemy import create_engine
 from scrapy.exceptions import DropItem
@@ -8,6 +9,7 @@ from .models import Base
 # from .models import FormationsSimplon, FormationsExt, SessionsFormations, Regions, Registres, Nsf, Formacodes
 # from .models import AssFormationsRegistres, AssFormationsExtRegistres, AssRegistresNsf, AssRegistresFormacodes, AssRegionsFormationsExt
 from .models import FormationsSimplon
+from .models import SessionsFormations
 # from .models import FormationsExt
 from .models import Regions
 from .models import Registres
@@ -29,7 +31,6 @@ class FormationSimplonPipeline:
         item = self.clean_voie_acces(item)
 
         # items de la page session
-        item = self.clean_agence(item)
         item = self.clean_date_limite(item)
         item = self.clean_region(item)
         item = self.clean_distanciel(item)
@@ -96,19 +97,6 @@ class FormationSimplonPipeline:
         return item
    
     # Nettoyage pages sessions/session
-    def clean_agence(self, item):
-        adapter = ItemAdapter(item)
-        agence = adapter.get("agence")
-        agence_temp = []
-        if agence:
-            if agence != []:
-                for i in range(len(agence)):
-                    agence[i] = agence[i].strip()
-                    if agence[i]:
-                        agence_temp.append(agence[i])
-                adapter["agence"] = agence_temp
-        return item
-
     def clean_date_limite(self, item):
         adapter = ItemAdapter(item)
         date_limite = adapter.get("date_limite")
@@ -117,6 +105,7 @@ class FormationSimplonPipeline:
                 date_limite = ";".join(date_limite)
                 date_limite = re.findall(r'(\d+)', date_limite)
                 date_limite = "/".join(date_limite)
+                date_limite = dateparser.parse(date_limite).date()
                 adapter["date_limite"] = date_limite
         return item
     
@@ -157,11 +146,12 @@ class FormationSimplonPipeline:
         adapter = ItemAdapter(item)
         echelle_duree = adapter.get("echelle_duree")
         if echelle_duree:
-            if echelle_duree != []:
-                for i in range(len(echelle_duree)):
-                    echelle_duree[i] = echelle_duree[i].strip()
-                echelle_duree = "".join(echelle_duree)
-            adapter["echelle_duree"] = echelle_duree
+            for i in range(len(echelle_duree)):
+                echelle_duree[i] = echelle_duree[i].strip()
+            echelle_duree = "".join(echelle_duree)
+        else:
+            echelle_duree = None
+        adapter["echelle_duree"] = echelle_duree
         return item
 
     def clean_date_debut(self, item):
@@ -172,6 +162,7 @@ class FormationSimplonPipeline:
                 date_debut = "".join(date_debut)
                 date_debut = re.findall(r'\d+/?', date_debut)
                 date_debut = "".join(date_debut)
+                date_debut = dateparser.parse(date_debut).date()
                 adapter["date_debut"] = date_debut
         return item
     
@@ -200,6 +191,7 @@ class FormationSimplonPipeline:
             date_fin = "".join(date_fin)
             if len(date_fin)>6:
                 date_fin = f"{date_fin[:-6]}/{date_fin[-6:-4]}/{date_fin[-4:]}"
+                date_fin = dateparser.parse(date_fin).date()
                 adapter["date_fin"] = date_fin
             else:
                 adapter["date_fin"] = None
@@ -359,19 +351,52 @@ class Database:
         elif intitule is not None and categ is not None:
             formation = FormationsSimplon(intitule_formation=item['intitule_formation'], categorie=item['categorie'])
             self.session.add(formation)
+            # self.session.flush()
             self.session.commit()
 
         # table sessions
-        
-        # session_formation = SessionsFormations(agence=item['agence'],
-        #     distanciel=item['distanciel'],
-        #     alternance=item['alternance'],
-        #     echelle_duree=item['echelle_duree'],
-        #     date_limite=item['date_limite'],
-        #     date_debut=item['date_debut'],
-        #     date_fin=item['date_fin'],
-        #     id_formation=item['id_formation'],
-        #     region=item['region'])
+        if item['intitule_formation']==" Technicien-ne supérieur-e systèmes et réseaux - Spécialité surveillance de sécurité ":
+            print("="*50)
+            print(item)
+            print("*"*50)
+        agence_test = item.get("agence", None)         
+        distanciel_test = item.get("distanciel", None)
+        alternance_test = item.get("alternance", None)
+        echelle_test = item.get("echelle_duree", None)
+        date_limite_test = item.get("date_limite", None)
+        date_debut_test = item.get("date_debut", None)
+        date_fin_test = item.get("date_fin", None)
+        existing_session = self.session.query(SessionsFormations).filter_by(agence=agence_test,
+                    distanciel=distanciel_test,
+                    alternance=alternance_test,
+                    echelle_duree=echelle_test,
+                    date_limite=date_limite_test,
+                    date_debut=date_debut_test,
+                    date_fin=date_fin_test,
+                    id_formation=formation.id_formation).first() 
+        if existing_session:
+            session_formation = existing_session
+        elif (agence_test, echelle_test, date_limite_test, date_debut_test, date_fin_test) != (None,None,None,None,None):
+            session_formation = SessionsFormations(agence=agence_test,
+                distanciel=distanciel_test,
+                alternance=alternance_test,
+                echelle_duree=echelle_test,
+                date_limite=date_limite_test,
+                date_debut=date_debut_test,
+                date_fin=date_fin_test,
+                id_formation=formation.id_formation)
+                # elif (agence_test, distanciel_test, alternance_test, echelle_test, date_limite_test, date_debut_test, date_fin_test) is not (None,None,None,None,None,None,None):
+                #     session_formation = SessionsFormations(agence=item['agence'],
+                #         distanciel=item['distanciel'],
+                #         alternance=item['alternance'],
+                #         echelle_duree=item['echelle_duree'],
+                #         date_limite=item['date_limite'],
+                #         date_debut=item['date_debut'],
+                #         date_fin=item['date_fin'],
+                #         id_formation=item['id_formation'],
+                #         region=item['region'])
+            self.session.add(session_formation)
+            self.session.commit()
 
        # table regions 
         reg = item.get("region", None)
@@ -406,61 +431,6 @@ class Database:
             self.session.add(registre)
             # self.session.flush()
             self.session.commit()
-
-        # solution try/except
-        # try:
-        #     existing_region = self.session.query(Regions).filter_by(region=item['region']).first()
-        #     if existing_region:
-        #         region = existing_region
-        #     else:
-        #         region = Regions(region=item['region'])
-        #         self.session.add(region)
-        #         # self.session.flush()
-        #         self.session.commit()
-
-        # except IntegrityError as e:
-        #     self.session.rollback()
-        #     print(f"Error saving item due to integrity error: {e}")
-        #     raise DropItem(f"Error saving item due to integrity error: {e}")
-        # except Exception as e:
-        #     self.session.rollback()
-        #     print(f"Error processing item: {e}")
-        #     raise DropItem(f"Error processing item: {e}")
-
-
-        # table regitres
-        # try:
-        #     type = item.get("rncp_url", None)
-        #     if type:
-        #         type = re.findall(r'/([a-zA-Z]+)/\d+', type)[0]
-        #         type = type.upper()
-        #     else:
-        #         type = None
-
-            # existing_registre = self.session.query(Registres).filter_by(type_registre=type, code_registre=item['code_rncp']).first()
-            # if existing_registre:
-            #     registre = existing_registre
-            # else:
-            #     registre = Registres(type_registre=type, 
-            #                 code_registre=item['code_rncp'],
-            #                 titre_registre=item['titre_rncp'],
-            #                 statut=item['statut_registre_rncp'],
-            #                 niveau_sortie=item['niveau_sortie_rncp'],
-            #                 url=item['rncp_url'])
-            #     self.session.add(registre)
-            #     # self.session.flush()
-            #     self.session.commit()
-
-        # except IntegrityError as e:
-        #     self.session.rollback()
-        #     print(f"Error saving item due to integrity error: {e}")
-        #     raise DropItem(f"Error saving item due to integrity error: {e}")
-        # except Exception as e:
-        #     self.session.rollback()
-        #     print(f"Error processing item: {e}")
-        #     raise DropItem(f"Error processing item: {e}")
-        # finally:
-        #     self.session.close()
 
         return item
 

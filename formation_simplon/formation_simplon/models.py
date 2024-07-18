@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, Date, Boolean, BLOB, create_engine, ForeignKey
+from sqlalchemy import Column, Integer, String, Float, Date, Boolean, create_engine, ForeignKey
 from sqlalchemy.orm import sessionmaker,declarative_base, relationship 
 
 Base = declarative_base()
@@ -10,7 +10,7 @@ class FormationsSimplon(Base):
     categorie = Column(String)
     # voie_acces = Column(String)
 
-#     rel_session_formation = relationship('SessionsFormations', back_populates='rel_formation_session',foreign_keys='sessions.id_formation')
+    rel_session_formation = relationship('SessionsFormations', back_populates='rel_formation_session')
 #     rel_registre_formation = relationship('AssFormationsRegistres', back_populates='rel_ass_formation_registre', foreign_keys='ass_formations_registres.id_formation')
 
 # class FormationsExt(Base):
@@ -22,20 +22,20 @@ class FormationsSimplon(Base):
 #     rel_registre_formation_ext = relationship('AssFormationsExtRegistres', back_populates='rel_ass_formation_ext_registre', foreign_keys='ass_formations_ext_registres.id_formation')
 #     rel_region_formation_ext = relationship('AssRegionsFormationsExt', back_populates='rel_ass_formation_ext_region', foreign_keys='ass_regions_formations_ext')
 
-# class SessionsFormations(Base):
-#     __tablename__ = 'sessions'
-#     id_session = Column(Integer, primary_key=True, autoincrement=True)
-#     agence = Column(String)
-#     distanciel = Column(Boolean)
-#     alternance = Column(Boolean)
-#     echelle_duree = Column(String)
-#     date_limite = Column(Date)
-#     date_debut = Column(Date)
-#     date_fin = Column(Date)
-#     id_formation = Column(Integer, ForeignKey('formations_simplon.id_formation'))
+class SessionsFormations(Base):
+    __tablename__ = 'sessions'
+    id_session = Column(Integer, primary_key=True, autoincrement=True)
+    agence = Column(String)
+    distanciel = Column(Boolean)
+    alternance = Column(Boolean)
+    echelle_duree = Column(String)
+    date_limite = Column(Date)
+    date_debut = Column(Date)
+    date_fin = Column(Date)
+    id_formation = Column(Integer, ForeignKey('formations_simplon.id_formation'))
 #     region = Column(String, ForeignKey('regions.region'))
 
-#     rel_formation_session = relationship('FormationsSimplon', back_populates='rel_session_formation')
+    rel_formation_session = relationship('FormationsSimplon', back_populates='rel_session_formation')
 #     rel_region_session = relationship('Regions', back_populates='rel_session_region')
 
 class Regions(Base):
