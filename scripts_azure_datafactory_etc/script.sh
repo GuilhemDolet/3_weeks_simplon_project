@@ -12,8 +12,7 @@
 # créer un groupe de resources (renseigné dans le .env)
  az group create --name $RESOURCE_GROUP --location $LOCATION 
 
- 
- # créer un blob
+# créer un blob
 #  az storage account create --resource-group $RESOURCE_GROUP --name $STORAGE_ACCOUNT --location $LOCATION
 
 # créer un conteneur pour le blob : 
@@ -60,4 +59,6 @@ az postgres flexible-server db create --server-name $SERVER_NAME --resource-grou
 ######################################################################################
 
 ### débugger az pipelines
-## unrecognized arguments: --organisation simplonformations.onmicrosoft.com
+## unrecognized arguments: --organisation simplonformations.onmicrosoft.com)
+
+

@@ -1,0 +1,33 @@
+# avoir installé Azure Cli
+# se logger avec azure cli dans cet environnement
+# ACTIVER LE SCRIPT "chmod +x script.sh" pour rendre le script exécutable
+# EXECUTER LE SCRIPT avec /scripts_azure 
+# puis . script.sh
+
+# charger les variables d'environnement
+ set -o allexport #suPprime toutes les variables importées avant celle la
+ source .env #crée des variables d'environnement à partir du .env 
+ set +o allexport
+
+# créer un groupe de resources (renseigné dans le .env), s'il n'existe pas
+if ! az group show --name $RESOURCE_GROUP &>/dev/null; then
+  az group create --name $RESOURCE_GROUP --location $LOCATION
+fi
+
+echo "___RESSOURCES_GROUP___ finish"
+
+# créer un blob
+#  az storage account create --resource-group $RESOURCE_GROUP --name $STORAGE_ACCOUNT --location $LOCATION
+
+# echo "___BLOB___ finish"
+
+## créer un conteneur pour le blob : 
+# az ad signed-in-user show --query id -o tsv | az role assignment create --role "Storage Blob Data Contributor" --assignee @- --scope "/subscriptions/$SUBSCRIPTION/resourceGroups/$RESOURCE_GROUP/providers/Microsoft.Storage/storageAccounts/$STORAGE_GROUP" 
+# az storage container create --account-name $STORAGE_ACCOUNT --name $STORAGE_CONTAINER --auth-mode login
+# echo "___BLOB_CONTAINER___ finish"
+
+## commande pour uploader le fichier :
+# az storage blob upload --account-name $STORAGE_ACCOUNT --container-name $STORAGE_CONTAINER --name script_hello.py --file script_hello.py --account-key $STORAGE_KEY
+# ensuite checker la présence le fichier depuis le blob
+# echo "___UPLOAD_IN_BLOB___ finish"
+
