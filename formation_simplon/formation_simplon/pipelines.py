@@ -1,12 +1,11 @@
 from itemadapter import ItemAdapter
 from sqlalchemy.orm import sessionmaker
-from formation_simplon.model_bdd.models import engine, Registres
 import re
 from sqlalchemy.orm import sessionmaker, declarative_base
 from sqlalchemy import create_engine
 from scrapy.exceptions import DropItem
 from sqlalchemy.exc import IntegrityError 
-from .models import Base
+from .models import Base, engine
 # from .models import FormationsSimplon, FormationsExt, SessionsFormations, Regions, Registres, Nsf, Formacodes
 # from .models import AssFormationsRegistres, AssFormationsExtRegistres, AssRegistresNsf, AssRegistresFormacodes, AssRegionsFormationsExt
 from .models import FormationsSimplon
@@ -470,4 +469,8 @@ class Database:
         self.session.close()
 
 class CompteFormationDatabase:
-    pass
+    def __init__(self):
+        self.Session = sessionmaker(bind=engine, autoflush=False)
+    
+    def process_item(self, item, spider):
+        session = self.Session()
