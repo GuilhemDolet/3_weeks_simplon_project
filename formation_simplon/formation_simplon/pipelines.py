@@ -13,12 +13,12 @@ from .models import SessionsFormations
 # from .models import FormationsExt
 from .models import Regions
 from .models import Registres
-# from .models import Nsf
-# from .models import Formacodes
+from .models import Nsf
+from .models import Formacodes
 from .models import AssFormationsRegistres
 # from .models import AssFormationsExtRegistres
-# from .models import AssRegistresNsf
-# from .models import AssRegistresFormacodes
+from .models import AssRegistresNsf
+from .models import AssRegistresFormacodes
 # from .models import AssRegionsFormationsExt
 
 
@@ -419,19 +419,19 @@ class Database:
             type = None
 
         code_registre_test = item.get("code_rncp", None)
-        titre_registre_test = item.get("titre_rncp", None)
-        statut_test = item.get("statut_registre_rncp", None)
-        niveau_test = item.get("niveau_sortie_rncp", None)
-        url_test = item.get("rncp_url", None)
+        titre_registre_test=item.get("titre_rncp", None)
+        statut_test=item.get("statut_registre_rncp", None)
+        niveau_sortie_test=item.get("niveau_sortie_rncp", None)
+        url_test=item.get("rncp_url", None)
         existing_registre = self.session.query(Registres).filter_by(type_registre=type, code_registre=code_registre_test).first()
         if existing_registre:
             registre = existing_registre
         elif type is not None and code_registre_test is not None:
             registre = Registres(type_registre=type, 
-                        code_registre=titre_registre_test,
+                        code_registre=code_registre_test,
                         titre_registre=titre_registre_test,
                         statut=statut_test,
-                        niveau_sortie=niveau_test,
+                        niveau_sortie=niveau_sortie_test,
                         url=url_test)
             self.session.add(registre)
             self.session.flush()
@@ -443,6 +443,51 @@ class Database:
                                          code_registre=registre.code_registre).first()
             if not existing_formation_registre:
                 registre.rel_formation_registre.append(formation)
+
+        # table formacodes
+        formacode_codes = item.get("formacode_code_rncp", None)
+        formacode_noms = item.get("formacode_nom_rncp", None)
+        if formacode_codes and formacode_codes!= []:
+            for i in range(len(formacode_codes)):
+                existing_formacode = self.session.query(Formacodes).filter_by(formacode_code=formacode_codes[i]).first()
+                if existing_formacode:
+                    formacode = existing_formacode
+                elif formacode_codes[i]:
+                    formacode = Formacodes(formacode_code=formacode_codes[i],
+                                           formacode_nom=formacode_noms[i])
+                    self.session.add(formacode)
+                    self.session.flush()
+
+                # table ass_registres_formacodes
+                if code_registre_test:
+                    existing_registre_formacode = self.session.query(AssRegistresFormacodes).filter_by(formacode_code=formacode.formacode_code,
+                                                type_registre=registre.type_registre, 
+                                                code_registre=registre.code_registre).first()
+                    if not existing_registre_formacode:
+                        registre.rel_formacode_registre.append(formacode)
+
+        # table nsf
+        nsf_codes = item.get("nsf_code_rncp", None)
+        nsf_noms = item.get("nsf_nom_rncp", None)
+        if nsf_codes and nsf_codes!= []:
+            for i in range(len(nsf_codes)):
+                existing_nsf = self.session.query(Nsf).filter_by(nsf_code=nsf_codes[i]).first()
+                if existing_nsf:
+                    nsf = existing_nsf
+                elif nsf_codes[i]:
+                    nsf = Nsf(nsf_code=nsf_codes[i], nsf_nom=nsf_noms[i])
+                    self.session.add(nsf)
+                    self.session.flush()
+
+                # table ass_registres_nsf
+                if code_registre_test:
+                    existing_registre_nsf = self.session.query(AssRegistresNsf).filter_by(nsf_code=nsf.nsf_code,
+                                                type_registre=registre.type_registre, 
+                                                code_registre=registre.code_registre).first()
+                    if not existing_registre_nsf:
+                        registre.rel_nsf_registre.append(nsf)
+
+
         self.session.commit()
 
         return item
