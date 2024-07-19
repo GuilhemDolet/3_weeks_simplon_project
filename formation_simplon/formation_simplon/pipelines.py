@@ -15,7 +15,7 @@ from .models import Regions
 from .models import Registres
 # from .models import Nsf
 # from .models import Formacodes
-# from .models import AssFormationsRegistres
+from .models import AssFormationsRegistres
 # from .models import AssFormationsExtRegistres
 # from .models import AssRegistresNsf
 # from .models import AssRegistresFormacodes
@@ -343,22 +343,29 @@ class Database:
         
     def process_item(self, item, spider):
         # table formations_simplon
-        intitule = item.get("intitule_formation", None)
-        categ = item.get("categorie", None)
-        existing_formation = self.session.query(FormationsSimplon).filter_by(intitule_formation=intitule, categorie=categ).first()
+        intitule_test = item.get("intitule_formation", None)
+        categorie_test = item.get("categorie", None)
+        existing_formation = self.session.query(FormationsSimplon).filter_by(intitule_formation=intitule_test, categorie=categorie_test).first()
         if existing_formation:
             formation = existing_formation
-        elif intitule is not None and categ is not None:
-            formation = FormationsSimplon(intitule_formation=item['intitule_formation'], categorie=item['categorie'])
+        elif intitule_test is not None and categorie_test is not None:
+            formation = FormationsSimplon(intitule_formation=intitule_test, categorie=categorie_test)
             self.session.add(formation)
-            # self.session.flush()
-            self.session.commit()
+            self.session.flush()
+            # self.session.commit()
+
+        # table regions 
+        region_test = item.get("region", None)
+        existing_region = self.session.query(Regions).filter_by(region=region_test).first()
+        if existing_region:
+            region = existing_region
+        elif region_test is not None:
+            region = Regions(region=region_test)
+            self.session.add(region)
+            self.session.flush()
+            # self.session.commit()
 
         # table sessions
-        if item['intitule_formation']==" Technicien-ne supérieur-e systèmes et réseaux - Spécialité surveillance de sécurité ":
-            print("="*50)
-            print(item)
-            print("*"*50)
         agence_test = item.get("agence", None)         
         distanciel_test = item.get("distanciel", None)
         alternance_test = item.get("alternance", None)
@@ -366,14 +373,26 @@ class Database:
         date_limite_test = item.get("date_limite", None)
         date_debut_test = item.get("date_debut", None)
         date_fin_test = item.get("date_fin", None)
-        existing_session = self.session.query(SessionsFormations).filter_by(agence=agence_test,
-                    distanciel=distanciel_test,
-                    alternance=alternance_test,
-                    echelle_duree=echelle_test,
-                    date_limite=date_limite_test,
-                    date_debut=date_debut_test,
-                    date_fin=date_fin_test,
-                    id_formation=formation.id_formation).first() 
+        if region_test is not None:
+            existing_session = self.session.query(SessionsFormations).filter_by(agence=agence_test,
+                        distanciel=distanciel_test,
+                        alternance=alternance_test,
+                        echelle_duree=echelle_test,
+                        date_limite=date_limite_test,
+                        date_debut=date_debut_test,
+                        date_fin=date_fin_test,
+                        id_formation=formation.id_formation,
+                        region=region.region).first()
+        else:
+            existing_session = self.session.query(SessionsFormations).filter_by(agence=agence_test,
+                        distanciel=distanciel_test,
+                        alternance=alternance_test,
+                        echelle_duree=echelle_test,
+                        date_limite=date_limite_test,
+                        date_debut=date_debut_test,
+                        date_fin=date_fin_test,
+                        id_formation=formation.id_formation).first()
+
         if existing_session:
             session_formation = existing_session
         elif (agence_test, echelle_test, date_limite_test, date_debut_test, date_fin_test) != (None,None,None,None,None):
@@ -384,31 +403,13 @@ class Database:
                 date_limite=date_limite_test,
                 date_debut=date_debut_test,
                 date_fin=date_fin_test,
-                id_formation=formation.id_formation)
-                # elif (agence_test, distanciel_test, alternance_test, echelle_test, date_limite_test, date_debut_test, date_fin_test) is not (None,None,None,None,None,None,None):
-                #     session_formation = SessionsFormations(agence=item['agence'],
-                #         distanciel=item['distanciel'],
-                #         alternance=item['alternance'],
-                #         echelle_duree=item['echelle_duree'],
-                #         date_limite=item['date_limite'],
-                #         date_debut=item['date_debut'],
-                #         date_fin=item['date_fin'],
-                #         id_formation=item['id_formation'],
-                #         region=item['region'])
+                id_formation=formation.id_formation,
+                region=region.region)
+               
             self.session.add(session_formation)
-            self.session.commit()
-
-       # table regions 
-        reg = item.get("region", None)
-        existing_region = self.session.query(Regions).filter_by(region=reg).first()
-        if existing_region:
-            region = existing_region
-        elif reg is not None:
-            region = Regions(region=item['region'])
-            self.session.add(region)
-            # self.session.flush()
-            self.session.commit()
-
+            self.session.flush()
+            # self.session.commit()
+       
         # table registres
         type = item.get("rncp_url", None)
         if type:
@@ -417,20 +418,32 @@ class Database:
         else:
             type = None
 
-        ref = item.get("code_rncp", None)
-        existing_registre = self.session.query(Registres).filter_by(type_registre=type, code_registre=ref).first()
+        code_registre_test = item.get("code_rncp", None)
+        titre_registre_test = item.get("titre_rncp", None)
+        statut_test = item.get("statut_registre_rncp", None)
+        niveau_test = item.get("niveau_sortie_rncp", None)
+        url_test = item.get("rncp_url", None)
+        existing_registre = self.session.query(Registres).filter_by(type_registre=type, code_registre=code_registre_test).first()
         if existing_registre:
             registre = existing_registre
-        elif type is not None and ref is not None:
+        elif type is not None and code_registre_test is not None:
             registre = Registres(type_registre=type, 
-                        code_registre=item['code_rncp'],
-                        titre_registre=item['titre_rncp'],
-                        statut=item['statut_registre_rncp'],
-                        niveau_sortie=item['niveau_sortie_rncp'],
-                        url=item['rncp_url'])
+                        code_registre=titre_registre_test,
+                        titre_registre=titre_registre_test,
+                        statut=statut_test,
+                        niveau_sortie=niveau_test,
+                        url=url_test)
             self.session.add(registre)
-            # self.session.flush()
-            self.session.commit()
+            self.session.flush()
+            # self.session.commit()
+
+        if code_registre_test:
+            existing_formation_registre = self.session.query(AssFormationsRegistres).filter_by(id_formation=formation.id_formation,
+                                         type_registre=registre.type_registre, 
+                                         code_registre=registre.code_registre).first()
+            if not existing_formation_registre:
+                registre.rel_formation_registre.append(formation)
+        self.session.commit()
 
         return item
 
