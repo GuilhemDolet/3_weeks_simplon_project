@@ -1,10 +1,11 @@
-from model_bdd.models import Session, FormationsExt, Regions
+from model_bdd.models import Session, FormationsExt, Regions, Registres
 import json
 
+data_url = 'formation_simplon/data.json'
 
-def load_json_into_databse(Session):
+def load_json_into_databse(Session, data_url):
 
-    with open('formation_simplon/data.json', 'r', encoding= 'utf-8') as file:
+    with open(data_url, 'r', encoding= 'utf-8') as file:
         data = json.load(file)
 
     session = Session()
@@ -30,12 +31,44 @@ def load_json_into_databse(Session):
             elif region_exist and entry.get('nom_region'):
                 ligne_formation_ext.region.append(region_exist)
 
+            # Remplissage de la table Registre + sa table d'association
+            #Type RS
+            if entry.get('type_referentiel') == 'RS': # type string
+                registre_exist = session.query(Registres).filter_by(type_registre=entry.get('type_referentiel'), code_registre=entry.get('code_inventaire')).first()
+
+                if registre_exist is None:
+                    ligne_registre = Registres(
+                        type_registre = entry.get('type_referentiel'),
+                        code_registre = entry.get('code_inventaire'),
+                        titre = entry.get('intitule_certification'),
+                        statut = "ACTIF",
+                        niveau_sortie = entry.get('libelle_niveau_sortie_formation'),
+                        url = None
+                    )
+                ligne_formation_ext.formation_ext.append(ligne_registre)
+
+            #Type RNCP
+            elif entry.get('type_referentiel') == 'RNCP': # type string
+                registre_exist = session.query(Registres).filter_by(type_registre=entry.get('type_referentiel'), code_registre=entry.get('code_inventaire')).first()
+
+                if registre_exist is None:
+                    ligne_registre = Registres(
+                        type_registre = entry.get('type_referentiel'),
+                        code_registre = entry.get('code_rncp'),
+                        titre = entry.get('intitule_certification'),
+                        statut = "ACTIF",
+                        niveau_sortie = entry.get('libelle_niveau_sortie_formation'),
+                        url = None
+                    )
+                ligne_formation_ext.formation_ext.append(ligne_registre)
+
+
+
         session.commit()
     except:
         session.rollback()
         raise
-
     finally:
         session.close()
 
-load_json_into_databse(Session)
+load_json_into_databse(Session, data_url)
