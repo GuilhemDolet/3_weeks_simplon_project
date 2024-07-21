@@ -52,7 +52,7 @@ class Registres(Base):
     type_registre = Column(String)
     code_registre = Column(Integer)
     titre_registre = Column(String)
-    statut = Column(String)
+    statut_registre= Column(String)
     niveau_sortie = Column(String)
     url = Column(String)
 
@@ -65,15 +65,15 @@ class Registres(Base):
 
 class Nsf(Base):
     __tablename__ = "nsf"
-    nsf_code = Column(String, primary_key=True, nullable=False)
-    nsf_nom = Column(String)
+    code_nsf = Column(String, primary_key=True, nullable=False)
+    nom_nsf = Column(String)
 
     rel_registre_nsf = relationship('Registres', secondary='ass_registres_nsf', back_populates='rel_nsf_registre')    
 
 class Formacodes(Base):
     __tablename__ = "formacodes"
-    formacode_code = Column(Integer, primary_key=True, nullable=False)
-    formacode_nom = Column(String)
+    code_formacode = Column(Integer, primary_key=True, nullable=False)
+    nom_formacode = Column(String)
 
     rel_registre_formacode = relationship('Registres', secondary='ass_registres_formacodes', back_populates='rel_formacode_registre')
    
@@ -95,7 +95,7 @@ class AssFormationsRegistres(Base):
 
 class AssRegistresNsf(Base):
     __tablename__ = "ass_registres_nsf"
-    nsf_code= Column(Integer, ForeignKey('nsf.nsf_code'), primary_key=True)
+    code_nsf= Column(Integer, ForeignKey('nsf.code_nsf'), primary_key=True)
     type_registre = Column(String, primary_key=True)
     code_registre = Column(Integer, primary_key=True)
 
@@ -103,7 +103,7 @@ class AssRegistresNsf(Base):
 
 class AssRegistresFormacodes(Base):
     __tablename__ = "ass_registres_formacodes"
-    formacode_code = Column(Integer, ForeignKey('formacodes.formacode_code'), primary_key=True)
+    code_formacode = Column(Integer, ForeignKey('formacodes.code_formacode'), primary_key=True)
     type_registre = Column(String, primary_key=True)
     code_registre = Column(Integer, primary_key=True)
 

@@ -344,26 +344,20 @@ class Database:
             # self.session.commit()
        
         # table registres
-        type = item.get("rncp_url", None)
-        if type:
-            type = re.findall(r'/([a-zA-Z]+)/\d+', type)[0]
-            type = type.upper()
-        else:
-            type = None
-
-        code_registre_test = item.get("code_rncp", None)
-        titre_registre_test=item.get("titre_rncp", None)
-        statut_test=item.get("statut_registre_rncp", None)
-        niveau_sortie_test=item.get("niveau_sortie_rncp", None)
-        url_test=item.get("rncp_url", None)
-        existing_registre = self.session.query(Registres).filter_by(type_registre=type, code_registre=code_registre_test).first()
+        type_registre_test = item.get("type_registre", None)
+        code_registre_test = item.get("code_registre", None)
+        titre_registre_test = item.get("titre_registre", None)
+        statut_test = item.get("statut_registre", None)
+        niveau_sortie_test = item.get("niveau_sortie", None)
+        url_test = item.get("url", None)
+        existing_registre = self.session.query(Registres).filter_by(type_registre=type_registre_test, code_registre=code_registre_test).first()
         if existing_registre:
             registre = existing_registre
-        elif type is not None and code_registre_test is not None:
-            registre = Registres(type_registre=type, 
+        elif type_registre_test is not None and code_registre_test is not None:
+            registre = Registres(type_registre=type_registre_test, 
                         code_registre=code_registre_test,
                         titre_registre=titre_registre_test,
-                        statut=statut_test,
+                        statut_registre=statut_test,
                         niveau_sortie=niveau_sortie_test,
                         url=url_test)
             self.session.add(registre)
@@ -378,43 +372,43 @@ class Database:
                 registre.rel_formation_registre.append(formation)
 
         # table formacodes
-        formacode_codes = item.get("formacode_code_rncp", None)
-        formacode_noms = item.get("formacode_nom_rncp", None)
-        if formacode_codes and formacode_codes!= []:
-            for i in range(len(formacode_codes)):
-                existing_formacode = self.session.query(Formacodes).filter_by(formacode_code=formacode_codes[i]).first()
+        codes_formacodes = item.get("code_formacode", None)
+        noms_formacodes = item.get("nom_formacode", None)
+        if codes_formacodes and codes_formacodes!= []:
+            for i in range(len(codes_formacodes)):
+                existing_formacode = self.session.query(Formacodes).filter_by(code_formacode=codes_formacodes[i]).first()
                 if existing_formacode:
                     formacode = existing_formacode
-                elif formacode_codes[i]:
-                    formacode = Formacodes(formacode_code=formacode_codes[i],
-                                           formacode_nom=formacode_noms[i])
+                elif codes_formacodes[i]:
+                    formacode = Formacodes(code_formacode=codes_formacodes[i],
+                                           nom_formacode=noms_formacodes[i])
                     self.session.add(formacode)
                     self.session.flush()
 
                 # table ass_registres_formacodes
                 if code_registre_test:
-                    existing_registre_formacode = self.session.query(AssRegistresFormacodes).filter_by(formacode_code=formacode.formacode_code,
+                    existing_registre_formacode = self.session.query(AssRegistresFormacodes).filter_by(code_formacode=formacode.code_formacode,
                                                 type_registre=registre.type_registre, 
                                                 code_registre=registre.code_registre).first()
                     if not existing_registre_formacode:
                         registre.rel_formacode_registre.append(formacode)
 
         # table nsf
-        nsf_codes = item.get("nsf_code_rncp", None)
-        nsf_noms = item.get("nsf_nom_rncp", None)
-        if nsf_codes and nsf_codes!= []:
-            for i in range(len(nsf_codes)):
-                existing_nsf = self.session.query(Nsf).filter_by(nsf_code=nsf_codes[i]).first()
+        codes_nsf = item.get("code_nsf", None)
+        noms_nsf = item.get("nom_nsf", None)
+        if codes_nsf and codes_nsf!= []:
+            for i in range(len(codes_nsf)):
+                existing_nsf = self.session.query(Nsf).filter_by(code_nsf=codes_nsf[i]).first()
                 if existing_nsf:
                     nsf = existing_nsf
-                elif nsf_codes[i]:
-                    nsf = Nsf(nsf_code=nsf_codes[i], nsf_nom=nsf_noms[i])
+                elif codes_nsf[i]:
+                    nsf = Nsf(code_nsf=codes_nsf[i], nom_nsf=noms_nsf[i])
                     self.session.add(nsf)
                     self.session.flush()
 
                 # table ass_registres_nsf
                 if code_registre_test:
-                    existing_registre_nsf = self.session.query(AssRegistresNsf).filter_by(nsf_code=nsf.nsf_code,
+                    existing_registre_nsf = self.session.query(AssRegistresNsf).filter_by(code_nsf=nsf.code_nsf,
                                                 type_registre=registre.type_registre, 
                                                 code_registre=registre.code_registre).first()
                     if not existing_registre_nsf:
