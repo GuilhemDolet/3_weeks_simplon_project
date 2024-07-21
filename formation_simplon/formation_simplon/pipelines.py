@@ -21,13 +21,11 @@ from .models import AssRegistresNsf
 from .models import AssRegistresFormacodes
 # from .models import AssRegionsFormationsExt
 
-
+# pipeline de nettoyage
 class FormationSimplonPipeline:
     def process_item(self, item, spider):
         # items de la page formation
-        item = self.clean_categorie(item)
-        item = self.clean_rncp(item)
-        item = self.clean_rs(item)
+        item = self.clean_categorie(item)   
         item = self.clean_voie_acces(item)
 
         # items de la page session
@@ -39,21 +37,16 @@ class FormationSimplonPipeline:
         item = self.clean_date_debut(item)
         item = self.clean_date_fin(item)
 
-        # item des pages francecompetences
-        item = self.clean_nsf_code_rncp(item)
-        item = self.clean_nsf_nom_rncp(item)
-        item = self.clean_formacode_code_rncp(item)
-        item = self.clean_formacode_nom_rncp(item)
-        item = self.clean_niveau_sortie_rncp(item)
-        item = self.clean_certificateur_nom_rncp(item)
-        item = self.clean_siret_rncp(item)
-
-        item = self.clean_nsf_code_rs(item)
-        item = self.clean_nsf_nom_rs(item)
-        item = self.clean_formacode_code_rs(item)
-        item = self.clean_formacode_nom_rs(item)
-        item = self.clean_certificateur_nom_rs(item)
-        item = self.clean_siret_rs(item)
+        # items des pages francecompetences
+        item = self.clean_type_registre(item)
+        item = self.clean_code_registre(item)
+        item = self.clean_code_nsf(item)
+        item = self.clean_nom_nsf(item)
+        item = self.clean_code_formacode(item)
+        item = self.clean_nom_formacode(item)
+        item = self.clean_niveau_sortie(item)
+        item = self.clean_certificateur(item)
+        item = self.clean_siret(item)
 
         return item
     
@@ -64,22 +57,6 @@ class FormationSimplonPipeline:
         if categorie:
             categorie = categorie.strip()
         adapter["categorie"] = categorie
-        return item
-    
-    def clean_rncp(self, item):
-        adapter = ItemAdapter(item)
-        rncp = adapter.get("code_rncp")
-        if rncp is not None:
-            rncp = re.findall(r'(\d+)', rncp)[0]
-            adapter["code_rncp"] = rncp
-        return item
-    
-    def clean_rs(self, item):
-        adapter = ItemAdapter(item)
-        rs = adapter.get("code_rs")
-        if rs is not None:
-            rs = re.findall(r'(\d+)', rs)[0]
-            adapter["code_rs"] = rs
         return item
     
     def clean_voie_acces(self, item):
@@ -197,143 +174,99 @@ class FormationSimplonPipeline:
                 adapter["date_fin"] = None
         return item
 
-    # Nettoyage pages francecompetences    
-    def clean_nsf_code_rncp(self, item):
+    # Nettoyage pages francecompetences
+    def clean_type_registre(self, item):
         adapter = ItemAdapter(item)
-        nsf_code_rncp = adapter.get("nsf_code_rncp")
-        if nsf_code_rncp:
-            if nsf_code_rncp != []:
-                for i in range(len(nsf_code_rncp)):
-                    nsf_code_rncp[i] = nsf_code_rncp[i].replace(":", "")
-                    nsf_code_rncp[i] = nsf_code_rncp[i].strip()
-                adapter["nsf_code_rncp"] = nsf_code_rncp
+        type_registre = adapter.get("type_registre")
+        if type_registre:
+            type_registre = re.findall(r'/([a-zA-Z]+)/\d+', type_registre)[0]
+            type_registre = type_registre.upper()
+        else:
+            type_registre = None
+        adapter["type_registre"] = type_registre
+        return item 
+    
+    def clean_code_registre(self, item):
+        adapter = ItemAdapter(item)
+        code_registre = adapter.get("code_registre")
+        if code_registre is not None:
+            code_registre = re.findall(r'(\d+)', code_registre)[0]
+            adapter["code_registre"] = code_registre
+        return item    
+        
+    def clean_code_nsf(self, item):
+        adapter = ItemAdapter(item)
+        code_nsf = adapter.get("code_nsf")
+        if code_nsf:
+            if code_nsf != []:
+                for i in range(len(code_nsf)):
+                    code_nsf[i] = code_nsf[i].replace(":", "")
+                    code_nsf[i] = code_nsf[i].strip()
+                adapter["code_nsf"] = code_nsf
         return item
     
-    def clean_nsf_nom_rncp(self, item):
+    def clean_nom_nsf(self, item):
         adapter = ItemAdapter(item)
-        nsf_nom_rncp = adapter.get("nsf_nom_rncp")
-        nsf_nom_temp = []
-        if nsf_nom_rncp:
-            if nsf_nom_rncp != []:
-                for i in range(len(nsf_nom_rncp)):
-                    nsf_nom_rncp[i] = nsf_nom_rncp[i].strip()
-                    if nsf_nom_rncp[i]:
-                        nsf_nom_temp.append(nsf_nom_rncp[i])
-                adapter["nsf_nom_rncp"] = nsf_nom_temp
+        nom_nsf = adapter.get("nom_nsf")
+        nom_nsf_temp = []
+        if nom_nsf:
+            if nom_nsf != []:
+                for i in range(len(nom_nsf)):
+                    nom_nsf[i] = nom_nsf[i].strip()
+                    if nom_nsf[i]:
+                        nom_nsf_temp.append(nom_nsf[i])
+                adapter["nom_nsf"] = nom_nsf_temp
         return item
     
-    def clean_formacode_code_rncp(self, item):
+    def clean_code_formacode(self, item):
         adapter = ItemAdapter(item)
-        formacode_code_rncp = adapter.get("formacode_code_rncp")
-        if formacode_code_rncp:
-            if formacode_code_rncp != []:
-                for i in range(len(formacode_code_rncp)):
-                    formacode_code_rncp[i] = re.findall(r'(\d+)',formacode_code_rncp[i])[0]
-                adapter["formacode_code_rncp"] = formacode_code_rncp
+        code_formacode = adapter.get("code_formacode")
+        if code_formacode:
+            if code_formacode != []:
+                for i in range(len(code_formacode)):
+                    code_formacode[i] = re.findall(r'(\d+)',code_formacode[i])[0]
+                adapter["code_formacode"] = code_formacode
         return item
     
-    def clean_formacode_nom_rncp(self, item):
+    def clean_nom_formacode(self, item):
         adapter = ItemAdapter(item)
-        formacode_nom_rncp = adapter.get("formacode_nom_rncp")
-        formacode_nom_temp = []
-        if formacode_nom_rncp:
-            if formacode_nom_rncp != []:
-                for i in range(len(formacode_nom_rncp)):
-                    formacode_nom_rncp[i] = formacode_nom_rncp[i].strip()
-                    if formacode_nom_rncp[i]:
-                        formacode_nom_temp.append(formacode_nom_rncp[i])
-                adapter["formacode_nom_rncp"] = formacode_nom_temp
+        nom_formacode = adapter.get("nom_formacode")
+        nom_formacode_temp = []
+        if nom_formacode:
+            if nom_formacode != []:
+                for i in range(len(nom_formacode)):
+                    nom_formacode[i] = nom_formacode[i].strip()
+                    if nom_formacode[i]:
+                        nom_formacode_temp.append(nom_formacode[i])
+                adapter["nom_formacode"] = nom_formacode_temp
         return item
     
-    def clean_niveau_sortie_rncp(self, item):
+    def clean_niveau_sortie(self, item):
         adapter = ItemAdapter(item)
-        niveau_sortie_rncp = adapter.get("niveau_sortie_rncp")
-        if niveau_sortie_rncp is not None:
-            niveau_sortie_rncp = niveau_sortie_rncp.strip()
-            adapter["niveau_sortie_rncp"] = niveau_sortie_rncp
+        niveau_sortie = adapter.get("niveau_sortie")
+        if niveau_sortie is not None:
+            niveau_sortie = niveau_sortie.strip()
+            adapter["niveau_sortie"] = niveau_sortie
         return item
     
-    def clean_certificateur_nom_rncp(self, item):
+    def clean_certificateur(self, item):
         adapter = ItemAdapter(item)
-        certificateur_nom_rncp = adapter.get("certificateur_nom_rncp")
-        if certificateur_nom_rncp is not None:
-            certificateur_nom_rncp = certificateur_nom_rncp.strip()
-            adapter["certificateur_nom_rncp"] = certificateur_nom_rncp
+        certificateur = adapter.get("certificateur")
+        if certificateur is not None:
+            certificateur = certificateur.strip()
+            adapter["certificateur"] = certificateur
         return item
     
-    def clean_siret_rncp(self, item):
+    def clean_siret(self, item):
         adapter = ItemAdapter(item)
-        siret_rncp = adapter.get("siret_rncp")
-        if siret_rncp:
-            siret_rncp = siret_rncp.strip()
-            siret_rncp = int(siret_rncp)
-            adapter["siret_rncp"] = siret_rncp
-        return item
-    
-    def clean_nsf_code_rs(self, item):
-        adapter = ItemAdapter(item)
-        nsf_code_rs = adapter.get("nsf_code_rs")
-        if nsf_code_rs:
-            if nsf_code_rs != []:
-                for i in range(len(nsf_code_rs)):
-                    nsf_code_rs[i] = nsf_code_rs[i].replace(":", "")
-                    nsf_code_rs[i] = nsf_code_rs[i].strip()
-                adapter["nsf_code_rs"] = nsf_code_rs
-        return item
-    
-    def clean_nsf_nom_rs(self, item):
-        adapter = ItemAdapter(item)
-        nsf_nom = adapter.get("nsf_nom_rs")
-        nsf_nom_temp = []
-        if nsf_nom:
-            if nsf_nom != []:
-                for i in range(len(nsf_nom)):
-                    nsf_nom[i] = nsf_nom[i].strip()
-                    if nsf_nom[i]:
-                        nsf_nom_temp.append(nsf_nom[i])
-                adapter["nsf_nom_rs"] = nsf_nom_temp
-        return item
-
-    def clean_formacode_code_rs(self, item):
-        adapter = ItemAdapter(item)
-        formacode_code = adapter.get("formacode_code_rs")
-        if formacode_code:
-            if formacode_code != []:
-                for i in range(len(formacode_code)):
-                    formacode_code[i] = re.findall(r'(\d+)',formacode_code[i])[0]
-                adapter["formacode_code_rs"] = formacode_code
-        return item
-    
-    def clean_formacode_nom_rs(self, item):
-        adapter = ItemAdapter(item)
-        formacode_nom = adapter.get("formacode_nom_rs")
-        formacode_nom_temp = []
-        if formacode_nom:
-            if formacode_nom != []:
-                for i in range(len(formacode_nom)):
-                    formacode_nom[i] = formacode_nom[i].strip()
-                    if formacode_nom[i]:
-                        formacode_nom_temp.append(formacode_nom[i])
-                adapter["formacode_nom_rs"] = formacode_nom_temp
-        return item
-    
-    def clean_certificateur_nom_rs(self, item):
-        adapter = ItemAdapter(item)
-        certificateur_nom = adapter.get("certificateur_nom_rs")
-        if certificateur_nom is not None:
-            certificateur_nom = certificateur_nom.strip()
-            adapter["certificateur_nom_rs"] = certificateur_nom
-        return item
-    
-    def clean_siret_rs(self, item):
-        adapter = ItemAdapter(item)
-        siret = adapter.get("siret_rs")
+        siret = adapter.get("siret")
         if siret:
             siret = siret.strip()
             siret = int(siret)
-            adapter["siret_rs"] = siret
+            adapter["siret"] = siret
         return item
-    
+
+# pipeline de mise en base de données     
 class Database:
     def __init__(self):
         engine = create_engine('sqlite:///mydatabase.db')
