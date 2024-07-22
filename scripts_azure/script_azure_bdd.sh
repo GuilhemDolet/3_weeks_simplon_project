@@ -11,7 +11,7 @@
 
 #!/bin/bash
 
-#### VARIABLES A METTRE (SECRET)
+
 
 
 # Erase .env if exist to renew values
