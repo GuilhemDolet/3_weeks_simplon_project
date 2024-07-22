@@ -9,19 +9,19 @@ Session = sessionmaker(bind=engine)
 # Session = Sessio-------------------#
 
 
-# ass_registres_nsf = Table(
-#                     'ass_registres_nsf', Base.metadata, # vous dites à SQLAlchemy que cette table fait partie du modèle ORM et qu'elle doit être incluse dans le schéma de la base de données.
-#                     Column('nsf_code', Integer, ForeignKey('nsf.nsf_code'), primary_key=True),
-#                     Column('type_registre', String, ForeignKey('registres.type_registre'), primary_key=True),
-#                     Column('code_registre', String, ForeignKey('registres.code_registre'), primary_key=True)
-# )
+ass_registres_nsf = Table(
+                    'ass_registres_nsf', Base.metadata, # vous dites à SQLAlchemy que cette table fait partie du modèle ORM et qu'elle doit être incluse dans le schéma de la base de données.
+                    Column('nsf_code', Integer, ForeignKey('nsf.nsf_code'), primary_key=True),
+                    Column('type_registre', String, ForeignKey('registres.type_registre'), primary_key=True),
+                    Column('code_registre', String, ForeignKey('registres.code_registre'), primary_key=True)
+)
 
-# ass_registres_formacodes = Table(
-#                     'ass_registres_formacodes', Base.metadata,
-#                     Column('formacodes', Integer, ForeignKey('formacodes.formacode_code'), primary_key=True),
-#                     Column('type_registre', String, ForeignKey('registres.type_registre'), primary_key=True),
-#                     Column('code_registre', String, ForeignKey('registres.code_registre'), primary_key=True)
-# )
+ass_registres_formacodes = Table(
+                    'ass_registres_formacodes', Base.metadata,
+                    Column('formacodes', Integer, ForeignKey('formacodes.formacode_code'), primary_key=True),
+                    Column('type_registre', String, ForeignKey('registres.type_registre'), primary_key=True),
+                    Column('code_registre', String, ForeignKey('registres.code_registre'), primary_key=True)
+)
 
 # ass_formations_simplon_registres = Table(
 #                     'ass_formations_simplon_registres', Base.metadata,
@@ -55,10 +55,27 @@ class Registres(Base):
     url = Column(String)
 
     # #Relation many-to-many avec Nsf (table d'association registres_nsf)
-    # registres = relationship('Nsf', secondary=ass_registres_nsf, back_populates='nsf')
+    registres_nsf = relationship(
+        'Nsf',
+        secondary=ass_registres_nsf,
+        primaryjoin='and_(Registres.type_registre == ass_registres_nsf.c.type_registre, '
+                    'Registres.code_registre == ass_registres_nsf.c.code_registre)',
+        secondaryjoin='Nsf.nsf_code == ass_registres_nsf.c.nsf_code',
+        back_populates='nsf_registres'
+    )
 
-    # # Relation many-to-many avec Formacodes
-    # registres_formacodes = relationship('Formacodes', secondary=ass_registres_formacodes, back_populates='formacodes')
+    # Relation many-to-many avec Formacodes
+    registres_formacodes = relationship(
+        'Formacodes',
+        secondary=ass_registres_formacodes,
+        foreign_keys=[ass_registres_formacodes.c.formacodes,
+                      ass_registres_formacodes.c.type_registre,
+                      ass_registres_formacodes.c.code_registre],
+        back_populates='formacodes',
+        primaryjoin='and_(Registres.type_registre == ass_registres_formacodes.c.type_registre, '
+                    'Registres.code_registre == ass_registres_formacodes.c.code_registre)',
+        secondaryjoin='Formacodes.formacode_code == ass_registres_formacodes.c.formacodes'
+    )
 
     # # Relation many-to-many avec FormationSimplon
     # registres_formation_simplon = relationship('FormationsSimplon', secondary=ass_formations_simplon_registres, back_populates='formation_simplon')
@@ -74,21 +91,38 @@ class Registres(Base):
                                                         secondaryjoin='FormationsExt.id_formation == ass_formations_ext_registres.c.id_formation'
                                                         )
 
-# class Nsf(Base):
-    # __tablename__ = 'nsf'
-    # nsf_code = Column(Integer, primary_key=True, nullable=False)
-    # nsf_nom = Column(String)
+class Nsf(Base):
+    __tablename__ = 'nsf'
+    nsf_code = Column(Integer, primary_key=True, nullable=False)
+    nsf_nom = Column(String)
 
-    # #Relation many-to-many avec Registres (table d'association registres_nsf)
-    # nsf = relationship('Registres', secondary=ass_registres_nsf, back_populates='registres')
+    #Relation many-to-many avec Registres (table d'association registres_nsf)
+    nsf_registres = relationship(
+        'Registres',
+        secondary=ass_registres_nsf,
+        primaryjoin='Nsf.nsf_code == ass_registres_nsf.c.nsf_code',
+        secondaryjoin='and_(Registres.type_registre == ass_registres_nsf.c.type_registre, '
+                      'Registres.code_registre == ass_registres_nsf.c.code_registre)',
+        back_populates='registres_nsf'
+    )
 
-# class Formacodes(Base):
-    # __tablename__ = 'formacodes'
-    # formacode_code = Column(Integer, primary_key=True, nullable=False)
-    # formacode_nom = Column(String)
+class Formacodes(Base):
+    __tablename__ = 'formacodes'
+    formacode_code = Column(Integer, primary_key=True, nullable=False)
+    formacode_nom = Column(String)
 
-    # # Relation many-to-many avec Registres
-    # formacodes = relationship('Registres', secondary=ass_registres_formacodes, back_populates='registres_formacodes')
+    # Relation many-to-many avec Registres
+    formacodes = relationship(
+    'Registres',
+    secondary=ass_registres_formacodes,
+    foreign_keys=[ass_registres_formacodes.c.formacodes,
+                    ass_registres_formacodes.c.type_registre,
+                    ass_registres_formacodes.c.code_registre],
+    back_populates='registres_formacodes',
+    primaryjoin='Formacodes.formacode_code == ass_registres_formacodes.c.formacodes',
+    secondaryjoin='and_(Registres.type_registre == ass_registres_formacodes.c.type_registre, '
+                    'Registres.code_registre == ass_registres_formacodes.c.code_registre)'
+    )
 
 class FormationsExt(Base):
     __tablename__ = 'formations_ext'
