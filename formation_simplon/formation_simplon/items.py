@@ -7,14 +7,11 @@ import scrapy
 
 
 class FormationSimplonItem(scrapy.Item):
-    # define the fields for your item here like:
-    # name = scrapy.Field()
+
     intitule_formation = scrapy.Field()
     categorie = scrapy.Field()
-    code_rncp = scrapy.Field()
-    code_rs = scrapy.Field()
     voie_acces = scrapy.Field()
-    
+
     agence = scrapy.Field()
     date_limite = scrapy.Field()
     region = scrapy.Field()
@@ -24,24 +21,16 @@ class FormationSimplonItem(scrapy.Item):
     date_debut = scrapy.Field()
     date_fin = scrapy.Field()
 
-    titre_rncp = scrapy.Field()
-    statut_registre_rncp = scrapy.Field()
-    nsf_code_rncp = scrapy.Field()
-    nsf_nom_rncp = scrapy.Field()
-    formacode_code_rncp = scrapy.Field()
-    formacode_nom_rncp = scrapy.Field()
-    niveau_sortie_rncp = scrapy.Field()
-    certificateur_nom_rncp = scrapy.Field()
-    siret_rncp = scrapy.Field()
-    rncp_url =scrapy.Field()
-
-    titre_rs = scrapy.Field()
-    statut_registre_rs = scrapy.Field()
-    nsf_code_rs = scrapy.Field()
-    nsf_nom_rs = scrapy.Field()
-    formacode_code_rs = scrapy.Field()
-    formacode_nom_rs = scrapy.Field()
-    certificateur_nom_rs = scrapy.Field()
-    siret_rs = scrapy.Field()
-    rs_url =scrapy.Field()
+    type_registre = scrapy.Field()
+    code_registre = scrapy.Field()
+    titre_registre = scrapy.Field()
+    statut_registre = scrapy.Field()
+    code_nsf = scrapy.Field()
+    nom_nsf = scrapy.Field()
+    code_formacode = scrapy.Field()
+    nom_formacode = scrapy.Field()
+    niveau_sortie = scrapy.Field()
+    certificateur = scrapy.Field()
+    siret = scrapy.Field()
+    url = scrapy.Field()
 
