@@ -1,3 +1,37 @@
+###################
+README INSTRUCTIONS
+###################
+
+##################
+Simplon_scraper v1
+##################
+
+
+prérequis: 
+
+> création de BDD et tables :
+- script_azure_bdd.sh (exécuter le script)
+- noter l'adresse de BDD affichée dans la console (normalement elle se charge dans le .env du dossier scripts_azure)
+- adresse BDD : à renseigner dans create_db (récupérable dans le .env)
+- lancer create_db pour créer les tables dans la BDD
+
+> lancer le scraper :
+- se rendre dans le dossier formation_simplon
+- taper la commande "scrapy crawl simplon_spider"
+- la BDD postgre se remplit en ligne 
+
+> consulter les données :
+- DBeaver > flexibleserverdb > bases de données > flexibleserverdb > Schémas > public > Tables > nom de la table souhaitée
+
+
+
+
+###########
+DBMS SCHEMA
+###########
+
+
+
 ```mermaid
 ---
 title: Simplon
@@ -85,3 +119,4 @@ erDiagram
     Regions ||--|{ Ass_formations_ext_regions : a 
 
 ```
+

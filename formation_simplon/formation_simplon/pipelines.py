@@ -269,8 +269,8 @@ class FormationSimplonPipeline:
 # pipeline de mise en base de données     
 class Database:
     def __init__(self):
-        engine = create_engine('sqlite:///mydatabase.db')
-        Base.metadata.create_all(engine)
+        engine = create_engine('postgresql+psycopg2://iratevenison3:qkDvlq24qQ1PUwqkuFNQRQ@pbo.postgres.database.azure.com:5432/flexibleserverdb')
+        # Base.metadata.create_all(engine)
         Session = sessionmaker(bind=engine)
         self.session = Session()
         
