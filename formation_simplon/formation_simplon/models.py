@@ -1,5 +1,7 @@
 from sqlalchemy import Column, Integer, String, Float, Date, Boolean, create_engine, ForeignKey, Table
+from sqlalchemy import Column, Integer, String, Float, Date, Boolean, create_engine, ForeignKey, Table
 from sqlalchemy.orm import sessionmaker,declarative_base, relationship 
+from sqlalchemy.schema import PrimaryKeyConstraint, ForeignKeyConstraint
 from sqlalchemy.schema import PrimaryKeyConstraint, ForeignKeyConstraint
 
 Base = declarative_base()
@@ -69,6 +71,8 @@ class SessionsFormations(Base):
 
     rel_formation_session = relationship('FormationsSimplon', back_populates='rel_session_formation')
     rel_region_session = relationship('Regions', back_populates='rel_session_region')
+    rel_formation_session = relationship('FormationsSimplon', back_populates='rel_session_formation')
+    rel_region_session = relationship('Regions', back_populates='rel_session_region')
 
 class Regions(Base):
     __tablename__ = "regions" 
@@ -81,7 +85,10 @@ class Registres(Base):
     __tablename__ = "registres"
     type_registre = Column(String)
     code_registre = Column(Integer)
+    type_registre = Column(String)
+    code_registre = Column(Integer)
     titre_registre = Column(String)
+    statut_registre= Column(String)
     statut_registre= Column(String)
     niveau_sortie = Column(String)
     url = Column(String)
@@ -112,6 +119,12 @@ class Formacodes(Base):
     __tablename__ = "formacodes"
     code_formacode = Column(Integer, primary_key=True, nullable=False)
     nom_formacode = Column(String)
+    rel_registre_nsf = relationship('Registres', secondary='ass_registres_nsf', back_populates='rel_nsf_registre')    
+
+class Formacodes(Base):
+    __tablename__ = "formacodes"
+    code_formacode = Column(Integer, primary_key=True, nullable=False)
+    nom_formacode = Column(String)
 
     rel_registre_formacode = relationship('Registres', secondary='ass_registres_formacodes', back_populates='rel_formacode_registre')
    
@@ -131,14 +144,23 @@ class AssRegistresNsf(Base):
 
     __table_args__ = (ForeignKeyConstraint(['type_registre','code_registre'],['registres.type_registre','registres.code_registre'],),)
 
-class AssRegistresFormacodes(Base):
-    __tablename__ = "ass_registres_formacodes"
-    code_formacode = Column(Integer, ForeignKey('formacodes.code_formacode'), primary_key=True)
-    type_registre = Column(String, primary_key=True)
-    code_registre = Column(Integer, primary_key=True)
+# class AssRegistresFormacodes(Base):
+#     __tablename__ = "ass_registres_formacodes"
+#     formacode_code = Column(Integer, ForeignKey('formacodes.formacode_code'), primary_key=True)
+#     type_registre = Column(String, ForeignKey('registres.type_registre'), primary_key=True)
+#     code_registre = Column(Integer, ForeignKey('registres.code_registre'), primary_key=True)
 
-    __table_args__ = (ForeignKeyConstraint(['type_registre','code_registre'],['registres.type_registre','registres.code_registre'],),)
+#     rel_ass_formacode_registre = relationship('Registres', back_populates='rel_formacode_registre')
+#     rel_ass_registre_formacode = relationship('Formacodes', back_populates='rel_registre_formacode')
 
-if "__main__" == __name__:
-    
-    Base.metadata.create_all(engine)
+# class AssRegionsFormationsExt(Base):
+#     __tablename__ = 'ass_regions_formations_ext'
+#     id_formation = Column(Integer, ForeignKey('formations_ext.id_formation'), primary_key=True)
+#     region = Column(String, ForeignKey('regions.region'), primary_key=True)
+
+#     rel_ass_region_formation_ext = relationship('Regions', back_populates='rel_formation_ext_region')
+#     rel_ass_formation_ext_region = relationship('FormationsExt', back_populates='rel_region_formation_ext')
+
+# engine = create_engine('sqlite:///mydatabase.db')
+# Base.metadata.create_all(engine)
+# Session = sessionmaker(bind=engine)
