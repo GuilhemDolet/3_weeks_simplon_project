@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "3-weeks-simplon-project"
+version = "0.1.0"
+description = "Notre envrionnement virtuel"
+authors = ["Gwhite <guilhem.dolet@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "3.12.1"
+Scrapy = "^2.11.2"
+SQLAlchemy = "^2.0.31"
+dotenv = "^0.0.5"
+fastapi = "^0.111.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
