@@ -11,6 +11,7 @@
 
 #!/bin/bash
 
+#### VARIABLES A METTRE (SECRET)
 
 
 
