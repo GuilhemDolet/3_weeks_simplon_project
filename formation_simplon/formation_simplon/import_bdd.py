@@ -1,4 +1,4 @@
-from models import Session, FormationsExt, Regions, Registres, Nsf
+from models import Session, FormationsExt, Regions, Registres, Nsf, Formacodes
 
 import json
 from contextlib import contextmanager
@@ -67,7 +67,7 @@ def load_json_into_databse(Session, data_url):
 
             # Remplissage de la table NSF pour un référentiel type RS ou RNCP
             check_and_load_nsf(session, ligne_registre, entry)
-            # check_and_load_formacodes(session, ligne_registre, entry)
+            check_and_load_formacodes(session, ligne_registre, entry)
 
 def check_and_load_nsf(session, ligne_registre, entry):
     nsf_dict = {
@@ -93,25 +93,25 @@ def check_and_load_nsf(session, ligne_registre, entry):
             if nsf_instance not in ligne_registre.rel_nsf_registre:
                 ligne_registre.rel_nsf_registre.append(nsf_instance)
 
-# def check_and_load_formacodes(session, ligne_registre, entry):
-#     formacode_keys = ['code_formacode_1', 'code_formacode_2', 'code_formacode_3', 'code_formacode_4', 'code_formacode_5']
-#     formacode_codes = [entry.get(key) for key in formacode_keys]
-#     existing_formacodes = {code: session.query(Formacodes).filter_by(code_formacode=code).first() for code in formacode_codes if code}
+def check_and_load_formacodes(session, ligne_registre, entry):
+    formacode_keys = ['code_formacode_1', 'code_formacode_2', 'code_formacode_3', 'code_formacode_4', 'code_formacode_5']
+    formacode_codes = [entry.get(key) for key in formacode_keys]
+    existing_formacodes = {code: session.query(Formacodes).filter_by(code_formacode=code).first() for code in formacode_codes if code}
 
-#     for code in formacode_codes:
-#         if code:
-#             formacode_instance = existing_formacodes.get(code) or session.query(Formacodes).filter_by(code_formacode=code).first()
-#             if not formacode_instance:
-#                 formacode_libelle = entry.get(f'libelle_formacode_{formacode_codes.index(code) + 1}')
-#                 formacode_instance = Formacodes(
-#                     code_formacode=code,
-#                     nom_formacode=formacode_libelle
-#                 )
-#                 session.add(formacode_instance)
-#                 session.flush()
+    for code in formacode_codes:
+        if code:
+            formacode_instance = existing_formacodes.get(code) or session.query(Formacodes).filter_by(code_formacode=code).first()
+            if not formacode_instance:
+                formacode_libelle = entry.get(f'libelle_formacode_{formacode_codes.index(code) + 1}')
+                formacode_instance = Formacodes(
+                    code_formacode=int(code),
+                    nom_formacode=formacode_libelle
+                )
+                session.add(formacode_instance)
+                session.flush()
 
-#             if formacode_instance not in ligne_registre.rel_formacode_registre:
-#                 ligne_registre.rel_formacode_registre.append(formacode_instance)
+            if formacode_instance not in ligne_registre.rel_formacode_registre:
+                ligne_registre.rel_formacode_registre.append(formacode_instance)
 
 load_json_into_databse(Session, data_url)
 

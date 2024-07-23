@@ -90,7 +90,7 @@ class Registres(Base):
 
     # rel_formation_registre = relationship('FormationsSimplon', secondary='ass_formations_registres', back_populates='rel_registre_formation')
     rel_nsf_registre = relationship('Nsf', secondary='ass_registres_nsf', back_populates='rel_registre_nsf')
-    # rel_formacode_registre = relationship('Formacodes', secondary='ass_registres_formacodes', back_populates='rel_registre_formacode')
+    rel_formacode_registre = relationship('Formacodes', secondary='ass_registres_formacodes', back_populates='rel_registre_formacode')
     # Relation many-to-many avec FormationExt
     registres_formation_ext = relationship('FormationsExt', secondary=ass_formations_ext_registres, 
                                            foreign_keys=[ass_formations_ext_registres.c.id_formation, 
@@ -108,12 +108,12 @@ class Nsf(Base):
 
     rel_registre_nsf = relationship('Registres', secondary='ass_registres_nsf', back_populates='rel_nsf_registre')    
 
-# class Formacodes(Base):
-#     __tablename__ = "formacodes"
-#     code_formacode = Column(Integer, primary_key=True, nullable=False)
-#     nom_formacode = Column(String)
+class Formacodes(Base):
+    __tablename__ = "formacodes"
+    code_formacode = Column(Integer, primary_key=True, nullable=False)
+    nom_formacode = Column(String)
 
-#     rel_registre_formacode = relationship('Registres', secondary='ass_registres_formacodes', back_populates='rel_formacode_registre')
+    rel_registre_formacode = relationship('Registres', secondary='ass_registres_formacodes', back_populates='rel_formacode_registre')
    
 # class AssFormationsRegistres(Base):
 #     __tablename__ = "ass_formations_registres"
@@ -139,13 +139,13 @@ class AssRegistresNsf(Base):
 
     __table_args__ = (ForeignKeyConstraint(['type_registre','code_registre'],['registres.type_registre','registres.code_registre'],),)
 
-# class AssRegistresFormacodes(Base):
-#     __tablename__ = "ass_registres_formacodes"
-#     code_formacode = Column(Integer, ForeignKey('formacodes.code_formacode'), primary_key=True)
-#     type_registre = Column(String, primary_key=True)
-#     code_registre = Column(Integer, primary_key=True)
+class AssRegistresFormacodes(Base):
+    __tablename__ = "ass_registres_formacodes"
+    code_formacode = Column(Integer, ForeignKey('formacodes.code_formacode'), primary_key=True)
+    type_registre = Column(String, primary_key=True)
+    code_registre = Column(Integer, primary_key=True)
 
-#     __table_args__ = (ForeignKeyConstraint(['type_registre','code_registre'],['registres.type_registre','registres.code_registre'],),)
+    __table_args__ = (ForeignKeyConstraint(['type_registre','code_registre'],['registres.type_registre','registres.code_registre'],),)
 
 # class AssRegionsFormationsExt(Base):
 #     __tablename__ = 'ass_regions_formations_ext'
