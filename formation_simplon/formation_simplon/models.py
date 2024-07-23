@@ -23,15 +23,15 @@ ass_formations_ext_regions = Table (
 # ---------------------------------------------------------------------
 
 
-# class FormationsSimplon(Base):
-#     __tablename__ = 'formations_simplon'
-#     id_formation = Column(Integer, primary_key=True, autoincrement=True)
-#     intitule_formation = Column(String)
-#     categorie = Column(String)
-#     # voie_acces = Column(String)
+class FormationsSimplon(Base):
+    __tablename__ = 'formations_simplon'
+    id_formation = Column(Integer, primary_key=True, autoincrement=True)
+    intitule_formation = Column(String)
+    categorie = Column(String)
+    # voie_acces = Column(String)
 
-#     rel_session_formation = relationship('SessionsFormations', back_populates='rel_formation_session')
-#     rel_registre_formation = relationship('Registres', secondary='ass_formations_registres', back_populates='rel_formation_registre')
+    rel_session_formation = relationship('SessionsFormations', back_populates='rel_formation_session')
+    rel_registre_formation = relationship('Registres', secondary='ass_formations_registres', back_populates='rel_formation_registre')
 
 
 class FormationsExt(Base):
@@ -54,27 +54,27 @@ class FormationsExt(Base):
     # relation many-to-many avec Registres
     region = relationship("Regions", secondary=ass_formations_ext_regions, back_populates="formation_ext")
 
-# class SessionsFormations(Base):
-#     __tablename__ = 'sessions'
-#     id_session = Column(Integer, primary_key=True, autoincrement=True)
-#     agence = Column(String)
-#     distanciel = Column(Boolean)
-#     alternance = Column(Boolean)
-#     echelle_duree = Column(String)
-#     date_limite = Column(Date)
-#     date_debut = Column(Date)
-#     date_fin = Column(Date)
-#     id_formation = Column(Integer, ForeignKey('formations_simplon.id_formation'))
-#     region = Column(String, ForeignKey('regions.region'))
+class SessionsFormations(Base):
+    __tablename__ = 'sessions'
+    id_session = Column(Integer, primary_key=True, autoincrement=True)
+    agence = Column(String)
+    distanciel = Column(Boolean)
+    alternance = Column(Boolean)
+    echelle_duree = Column(String)
+    date_limite = Column(Date)
+    date_debut = Column(Date)
+    date_fin = Column(Date)
+    id_formation = Column(Integer, ForeignKey('formations_simplon.id_formation'))
+    region = Column(String, ForeignKey('regions.region'))
 
-#     rel_formation_session = relationship('FormationsSimplon', back_populates='rel_session_formation')
-#     rel_region_session = relationship('Regions', back_populates='rel_session_region')
+    rel_formation_session = relationship('FormationsSimplon', back_populates='rel_session_formation')
+    rel_region_session = relationship('Regions', back_populates='rel_session_region')
 
 class Regions(Base):
     __tablename__ = "regions" 
     region = Column(String, primary_key=True)
 
-    # rel_session_region = relationship('SessionsFormations', back_populates='rel_region_session')
+    rel_session_region = relationship('SessionsFormations', back_populates='rel_region_session')
      # Relation many-to-many avec FormationExt
     formation_ext = relationship("FormationsExt", secondary=ass_formations_ext_regions, back_populates='region')
 class Registres(Base):
@@ -88,7 +88,7 @@ class Registres(Base):
 
     __table_args__ =(PrimaryKeyConstraint('type_registre', 'code_registre'),)
 
-    # rel_formation_registre = relationship('FormationsSimplon', secondary='ass_formations_registres', back_populates='rel_registre_formation')
+    rel_formation_registre = relationship('FormationsSimplon', secondary='ass_formations_registres', back_populates='rel_registre_formation')
     rel_nsf_registre = relationship('Nsf', secondary='ass_registres_nsf', back_populates='rel_registre_nsf')
     rel_formacode_registre = relationship('Formacodes', secondary='ass_registres_formacodes', back_populates='rel_registre_formacode')
     # Relation many-to-many avec FormationExt
@@ -115,21 +115,13 @@ class Formacodes(Base):
 
     rel_registre_formacode = relationship('Registres', secondary='ass_registres_formacodes', back_populates='rel_formacode_registre')
    
-# class AssFormationsRegistres(Base):
-#     __tablename__ = "ass_formations_registres"
-#     id_formation = Column(Integer, ForeignKey('formations_simplon.id_formation'), primary_key=True)
-#     type_registre = Column(String, primary_key=True, nullable=False)
-#     code_registre = Column(Integer, primary_key=True, nullable=False)
+class AssFormationsRegistres(Base):
+    __tablename__ = "ass_formations_registres"
+    id_formation = Column(Integer, ForeignKey('formations_simplon.id_formation'), primary_key=True)
+    type_registre = Column(String, primary_key=True, nullable=False)
+    code_registre = Column(Integer, primary_key=True, nullable=False)
 
-#     __table_args__ = (ForeignKeyConstraint(['type_registre','code_registre'],['registres.type_registre','registres.code_registre'],),)
-
-# class AssFormationsExtRegistres(Base):
-#     __tablename__ = "ass_formations_ext_registres"
-#     id_formation = Column(Integer, ForeignKey('formations_ext.id_formation'), primary_key=True)
-#     type_registre = Column(String, primary_key=True)
-#     code_registre = Column(Integer, primary_key=True)
-
-    # __table_args__ = (ForeignKeyConstraint(['type_registre','code_registre'],['registres.type_registre','registres.code_registre'],),)
+    __table_args__ = (ForeignKeyConstraint(['type_registre','code_registre'],['registres.type_registre','registres.code_registre'],),)
 
 class AssRegistresNsf(Base):
     __tablename__ = "ass_registres_nsf"
@@ -146,12 +138,6 @@ class AssRegistresFormacodes(Base):
     code_registre = Column(Integer, primary_key=True)
 
     __table_args__ = (ForeignKeyConstraint(['type_registre','code_registre'],['registres.type_registre','registres.code_registre'],),)
-
-# class AssRegionsFormationsExt(Base):
-#     __tablename__ = 'ass_regions_formations_ext'
-#     id_formation = Column(Integer, ForeignKey('formations_ext.id_formation'), primary_key=True)
-#     region = Column(String, ForeignKey('regions.region'), primary_key=True)
-
 
 if "__main__" == __name__:
     
