@@ -33,4 +33,3 @@ class FormationSimplonItem(scrapy.Item):
     certificateur = scrapy.Field()
     siret = scrapy.Field()
     url = scrapy.Field()
-
