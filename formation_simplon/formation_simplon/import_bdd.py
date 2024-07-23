@@ -1,5 +1,5 @@
-from models import Session, FormationsExt, Regions, Registres
-# , Nsf, Formacodes
+from models import Session, FormationsExt, Regions, Registres, Nsf
+
 import json
 from contextlib import contextmanager
 
@@ -66,32 +66,32 @@ def load_json_into_databse(Session, data_url):
             ligne_formation_ext.formation_ext.append(ligne_registre)
 
             # Remplissage de la table NSF pour un référentiel type RS ou RNCP
-            # check_and_load_nsf(session, ligne_registre, entry)
+            check_and_load_nsf(session, ligne_registre, entry)
             # check_and_load_formacodes(session, ligne_registre, entry)
 
-# def check_and_load_nsf(session, ligne_registre, entry):
-#     nsf_dict = {
-#         'code_nsf_1': 'libelle_nsf_1',
-#         'code_nsf_2': 'libelle_nsf_2',
-#         'code_nsf_3': 'libelle_nsf_3'
-#     }
+def check_and_load_nsf(session, ligne_registre, entry):
+    nsf_dict = {
+        'code_nsf_1': 'libelle_nsf_1',
+        'code_nsf_2': 'libelle_nsf_2',
+        'code_nsf_3': 'libelle_nsf_3'
+    }
 
-#     nsf_codes = {code: entry.get(code) for code in nsf_dict}
-#     existing_nsfs = {code: session.query(Nsf).filter_by(code_nsf=nsf_code).first() for code, nsf_code in nsf_codes.items()}
+    nsf_codes = {code: entry.get(code) for code in nsf_dict}
+    existing_nsfs = {code: session.query(Nsf).filter_by(code_nsf=nsf_code).first() for code, nsf_code in nsf_codes.items()}
 
-#     for code, nsf_code in nsf_codes.items():
-#         if nsf_code:
-#             nsf_instance = existing_nsfs.get(code) or session.query(Nsf).filter_by(code_nsf=nsf_code).first()
-#             if not nsf_instance:
-#                 nsf_instance = Nsf(
-#                     code_nsf=nsf_code,
-#                     nom_nsf=entry.get(nsf_dict[code])
-#                 )
-#                 session.add(nsf_instance)
-#                 session.flush()
+    for code, nsf_code in nsf_codes.items():
+        if nsf_code:
+            nsf_instance = existing_nsfs.get(code) or session.query(Nsf).filter_by(code_nsf=nsf_code).first()
+            if not nsf_instance:
+                nsf_instance = Nsf(
+                    code_nsf=nsf_code,
+                    nom_nsf=entry.get(nsf_dict[code])
+                )
+                session.add(nsf_instance)
+                session.flush()
 
-#             if nsf_instance not in ligne_registre.rel_nsf_registre:
-#                 ligne_registre.rel_nsf_registre.append(nsf_instance)
+            if nsf_instance not in ligne_registre.rel_nsf_registre:
+                ligne_registre.rel_nsf_registre.append(nsf_instance)
 
 # def check_and_load_formacodes(session, ligne_registre, entry):
 #     formacode_keys = ['code_formacode_1', 'code_formacode_2', 'code_formacode_3', 'code_formacode_4', 'code_formacode_5']

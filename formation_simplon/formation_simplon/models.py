@@ -89,7 +89,7 @@ class Registres(Base):
     __table_args__ =(PrimaryKeyConstraint('type_registre', 'code_registre'),)
 
     # rel_formation_registre = relationship('FormationsSimplon', secondary='ass_formations_registres', back_populates='rel_registre_formation')
-    # rel_nsf_registre = relationship('Nsf', secondary='ass_registres_nsf', back_populates='rel_registre_nsf')
+    rel_nsf_registre = relationship('Nsf', secondary='ass_registres_nsf', back_populates='rel_registre_nsf')
     # rel_formacode_registre = relationship('Formacodes', secondary='ass_registres_formacodes', back_populates='rel_registre_formacode')
     # Relation many-to-many avec FormationExt
     registres_formation_ext = relationship('FormationsExt', secondary=ass_formations_ext_registres, 
@@ -101,12 +101,12 @@ class Registres(Base):
                                                         'Registres.code_registre == ass_formations_ext_registres.c.code_registre)',
                                                         secondaryjoin='FormationsExt.id_formation == ass_formations_ext_registres.c.id_formation'
                                                         )
-# class Nsf(Base):
-#     __tablename__ = "nsf"
-#     code_nsf = Column(String, primary_key=True, nullable=False)
-#     nom_nsf = Column(String)
+class Nsf(Base):
+    __tablename__ = "nsf"
+    code_nsf = Column(String, primary_key=True, nullable=False)
+    nom_nsf = Column(String)
 
-#     rel_registre_nsf = relationship('Registres', secondary='ass_registres_nsf', back_populates='rel_nsf_registre')    
+    rel_registre_nsf = relationship('Registres', secondary='ass_registres_nsf', back_populates='rel_nsf_registre')    
 
 # class Formacodes(Base):
 #     __tablename__ = "formacodes"
@@ -131,13 +131,13 @@ class Registres(Base):
 
     # __table_args__ = (ForeignKeyConstraint(['type_registre','code_registre'],['registres.type_registre','registres.code_registre'],),)
 
-# class AssRegistresNsf(Base):
-#     __tablename__ = "ass_registres_nsf"
-#     code_nsf= Column(String, ForeignKey('nsf.code_nsf'), primary_key=True)
-#     type_registre = Column(String, primary_key=True)
-#     code_registre = Column(Integer, primary_key=True)
+class AssRegistresNsf(Base):
+    __tablename__ = "ass_registres_nsf"
+    code_nsf= Column(String, ForeignKey('nsf.code_nsf'), primary_key=True)
+    type_registre = Column(String, primary_key=True)
+    code_registre = Column(Integer, primary_key=True)
 
-#     __table_args__ = (ForeignKeyConstraint(['type_registre','code_registre'],['registres.type_registre','registres.code_registre'],),)
+    __table_args__ = (ForeignKeyConstraint(['type_registre','code_registre'],['registres.type_registre','registres.code_registre'],),)
 
 # class AssRegistresFormacodes(Base):
 #     __tablename__ = "ass_registres_formacodes"
