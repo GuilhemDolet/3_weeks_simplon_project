@@ -95,7 +95,7 @@ class AssFormationsRegistres(Base):
 
 class AssRegistresNsf(Base):
     __tablename__ = "ass_registres_nsf"
-    code_nsf= Column(Integer, ForeignKey('nsf.code_nsf'), primary_key=True)
+    code_nsf= Column(String, ForeignKey('nsf.code_nsf'), primary_key=True)
     type_registre = Column(String, primary_key=True)
     code_registre = Column(Integer, primary_key=True)
 
