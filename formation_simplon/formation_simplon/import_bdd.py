@@ -113,5 +113,6 @@ def check_and_load_formacodes(session, ligne_registre, entry):
             if formacode_instance not in ligne_registre.rel_formacode_registre:
                 ligne_registre.rel_formacode_registre.append(formacode_instance)
 
+
 load_json_into_databse(Session, data_url)
 
