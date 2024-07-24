@@ -9,6 +9,10 @@ moncompteformation_catalogueformation.csv
 *.csv
 essai.py
 # User-specific files
+
+*.venv
+*.env
+poetry.lock
 *.rsuser
 *.suo
 *.user
