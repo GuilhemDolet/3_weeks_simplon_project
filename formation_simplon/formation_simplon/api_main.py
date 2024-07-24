@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import JSONResponse
 from sqlalchemy import Column, Integer, String, Float, MetaData, create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 from models import Base
@@ -32,13 +33,14 @@ app = FastAPI()
 def session_open():
     # url_db = f"postgresql://{username}:{password}@{server}.postgres.database.azure.com:5432/{nom_db}"
     # engine = create_engine(url_db)
-    engine = create_engine('sqlite:///../mydatabase.db')
+    engine = create_engine('sqlite:///../mydatabase.db', connect_args={"check_same_thread": False})
     
     Session = sessionmaker(bind=engine)
     session = Session()
     return session
 
 # route ok
+# affichage des formations dont l'intitulé de formation contient intitule
 @app.get("/intitule")
 def get_infos(intitule:str):
     session = session_open()
@@ -46,16 +48,18 @@ def get_infos(intitule:str):
     match_intitule = session.query(FormationsSimplon).filter(FormationsSimplon.intitule_formation.ilike(intitule_test)).all()
     if match_intitule:
         session.close()
-        return "trouvé", match_intitule
+        return match_intitule
     else:
         session.close()
         return "pas trouvé"
 
-# erreur 500 
+# route ok
+# affichage des formations et des sessions dont l'intitulé de formation contient intitule
 @app.get("/session")
-def get_session(id:int):
+def get_session(intitule:str):
     session = session_open()
-    # intitule_test = f"%{intitule}%"
+    intitule_test = f"%{intitule}%"
+    results = []
     match_intitule = session.query(FormationsSimplon.id_formation,
                                    FormationsSimplon.intitule_formation,
                                    FormationsSimplon.categorie,
@@ -67,13 +71,24 @@ def get_session(id:int):
                                    SessionsFormations.date_fin)\
         .select_from(FormationsSimplon)\
         .outerjoin(SessionsFormations, SessionsFormations.id_formation == FormationsSimplon.id_formation)\
-        .filter(FormationsSimplon.id_formation == id).first()
+        .filter(FormationsSimplon.intitule_formation.ilike(intitule_test)).all()
+    print(match_intitule)
+    print(type(match_intitule))
     if match_intitule:
+        for match in match_intitule:
+            results.append(match._mapping)
         session.close()
-        return "trouvé", match_intitule
+        return results
     else:
         session.close()
-        return "pas trouvé"
+        return "pas trouvé" 
+    # version .fisrt()
+    # if match_intitule:
+    #     session.close()
+    #     return match_intitule._mapping
+    # else:
+    #     session.close()
+    #     return "pas trouvé"
 
     # match_region = session.query(Regions).filter(Regions.region=="intitule").all()
     # for region in match_region:
@@ -106,27 +121,6 @@ def get_session(id:int):
     #       date_limite,
     #       date_debut,
     #       date_fin)
-def essai(id):
-    session = session_open()
-    # intitule_test = f"%{intitule}%"
-    match_intitule = session.query(FormationsSimplon.id_formation,
-                                   FormationsSimplon.intitule_formation,
-                                   FormationsSimplon.categorie,
-                                   SessionsFormations.agence,
-                                   SessionsFormations.distanciel,
-                                   SessionsFormations.alternance,
-                                   SessionsFormations.date_limite,
-                                   SessionsFormations.date_debut,
-                                   SessionsFormations.date_fin)\
-        .select_from(FormationsSimplon)\
-        .outerjoin(SessionsFormations, SessionsFormations.id_formation == FormationsSimplon.id_formation)\
-        .filter(FormationsSimplon.id_formation == id).first()
-    if match_intitule:
-        session.close()
-        return "trouvé", match_intitule
-    else:
-        session.close()
-        return "pas trouvé"
 
 @app.get("/registre")
 def get_infos(code_registre:int):
@@ -185,3 +179,9 @@ def get_infos(code_formacode:int):
     else:
         session.close()
         return "pas trouvé"
+    
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)
+
+
+
