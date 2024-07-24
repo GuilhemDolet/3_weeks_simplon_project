@@ -39,12 +39,12 @@ erDiagram
         url url
     }
     Nsf {
-        int nsf_code PK
-        string nsf_nom
+        string code_nsf PK
+        string nom_nsf
     }
     Formacodes {
-        int formacode_code PK
-        string formacode_nom
+        int code_formacode PK
+        string nom_formacode
     }
     Ass_formations_simplon_registres {
         int id_formation PK, FK
@@ -57,12 +57,12 @@ erDiagram
         int code_registre PK, FK
     }
     Ass_registres_nsf {
-        int nsf_code PK, FK
+        string code_nsf PK, FK
         string type_registre PK, FK
         int code_registre PK, FK
     }
     Ass_registres_formacodes {
-        int formacode_code PK, FK
+        int code_formacode PK, FK
         string type_registre PK, FK
         int code_registre PK, FK
     }
