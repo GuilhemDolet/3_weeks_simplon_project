@@ -1,28 +1,79 @@
-from sqlalchemy import Column, Integer, String, Float, Date, Boolean, create_engine, ForeignKey, Table
-from sqlalchemy.orm import sessionmaker,declarative_base, relationship 
+from sqlalchemy import Column, Integer, String, Float, Date, Boolean, create_engine, ForeignKey, Table, MetaData
+from sqlalchemy.orm import sessionmaker, declarative_base, relationship 
 from sqlalchemy.schema import PrimaryKeyConstraint, ForeignKeyConstraint
+import os
+from dotenv import load_dotenv
 
 Base = declarative_base()
+# metadata = MetaData(schema='public')  # Définir le schéma par défaut
+
+########################### automatisation avec le script_automatise et le .env
+
+# Spécifiez le chemin vers votre fichier .env
+env_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'scripts_azure', '.env')
+
+# Chargez les variables d'environnement depuis le fichier .env
+load_dotenv(dotenv_path=env_path)
+
+# Maintenant, vous pouvez accéder aux variables d'environnement comme d'habitude
+DATABASE_URL = os.getenv('DATABASE_URL')
+engine = create_engine(DATABASE_URL)
+########################### fin automatisation
+
+# engine = create_engine('postgresql+psycopg2://iratevenison3:qkDvlq24qQ1PUwqkuFNQRQ@pbo.postgres.database.azure.com:5432/simplondb') 
+# # à décommenter si auto marche pas
+
+Session = sessionmaker(bind=engine) # permet de gérer les transaction (ajout et modification et suppression de données)
+
+
+#-------------------------- TABLE ASSOCIATIONS --------------------# 
+# Uniquement pour la partie de la BDD peuplé par les données de Mon compte formation
+
+ass_formations_ext_registres = Table(
+    'ass_formations_ext_registres', Base.metadata,
+    Column('id_formation', Integer, ForeignKey('formations_ext.id_formation'), primary_key=True),
+    Column('type_registre', String, primary_key=True),
+    Column('code_registre', Integer, primary_key=True),
+    ForeignKeyConstraint(['type_registre', 'code_registre'], 
+                         ['registres.type_registre', 'registres.code_registre'])
+)
+ass_formations_ext_regions = Table (
+    'ass_formations_ext_regions', Base.metadata,
+    Column('id_formation', Integer, ForeignKey('formations_ext.id_formation'), primary_key=True),
+    Column('region', String, ForeignKey('regions.region'), primary_key=True)
+)
+# # ---------------------------------------------------------------------
+
 
 class FormationsSimplon(Base):
     __tablename__ = 'formations_simplon'
     id_formation = Column(Integer, primary_key=True, autoincrement=True)
     intitule_formation = Column(String)
     categorie = Column(String)
-    # voie_acces = Column(String)
 
     rel_session_formation = relationship('SessionsFormations', back_populates='rel_formation_session')
     rel_registre_formation = relationship('Registres', secondary='ass_formations_registres', back_populates='rel_formation_registre')
 
 
-# class FormationsExt(Base):
-#     __tablename__ = 'formations_ext'
-#     id_formation = Column(Integer, primary_key=True, autoincrement=True)
-#     intitule_formation = Column(String)
-#     organisme = Column(String)
+class FormationsExt(Base):
+    __tablename__ = 'formations_ext'
+    id_formation = Column(Integer, primary_key=True, autoincrement=True, nullable=False)
+    intitule_formation = Column(String)
+    organisme = Column(String)
 
-#     rel_registre_formation_ext = relationship('Registres', secondary='ass_formations_ext_registres', back_populates='rel_formation_ext_registre')
-#     rel_region_formation_ext = relationship('Regions', secondary='ass_regions_formations_ext', back_populates='rel_formation_ext_region')
+    # relation many-to-many avec Registres
+    formation_ext = relationship("Registres", secondary=ass_formations_ext_registres, 
+                                 foreign_keys=[ass_formations_ext_registres.c.id_formation, 
+                                 ass_formations_ext_registres.c.type_registre, 
+                                 ass_formations_ext_registres.c.code_registre],
+                                 back_populates="registres_formation_ext",
+                                 primaryjoin='FormationsExt.id_formation == ass_formations_ext_registres.c.id_formation',
+                                 secondaryjoin='and_(Registres.type_registre == ass_formations_ext_registres.c.type_registre, '
+                                 'Registres.code_registre == ass_formations_ext_registres.c.code_registre)'
+                                 )
+
+    # relation many-to-many avec Registres
+    region = relationship("Regions", secondary=ass_formations_ext_regions, back_populates="formation_ext")
 
 class SessionsFormations(Base):
     __tablename__ = 'sessions'
@@ -45,8 +96,8 @@ class Regions(Base):
     region = Column(String, primary_key=True)
 
     rel_session_region = relationship('SessionsFormations', back_populates='rel_region_session')
-    # rel_formation_ext_region = relationship('FormationsExt', secondary='ass_regions_formations_ext', back_populates='rel_region_formation_ext')
-
+     # Relation many-to-many avec FormationExt
+    formation_ext = relationship("FormationsExt", secondary=ass_formations_ext_regions, back_populates='region')
 class Registres(Base):
     __tablename__ = "registres"
     type_registre = Column(String)
@@ -61,8 +112,16 @@ class Registres(Base):
     rel_formation_registre = relationship('FormationsSimplon', secondary='ass_formations_registres', back_populates='rel_registre_formation')
     rel_nsf_registre = relationship('Nsf', secondary='ass_registres_nsf', back_populates='rel_registre_nsf')
     rel_formacode_registre = relationship('Formacodes', secondary='ass_registres_formacodes', back_populates='rel_registre_formacode')
-    # rel_formation_ext_registre = relationship('FormationsExt', secondary='ass_formations_ext_registres', back_populates='rel_registre_formation_ext')
-
+    # Relation many-to-many avec FormationExt
+    registres_formation_ext = relationship('FormationsExt', secondary=ass_formations_ext_registres, 
+                                           foreign_keys=[ass_formations_ext_registres.c.id_formation, 
+                                                        ass_formations_ext_registres.c.type_registre, 
+                                                        ass_formations_ext_registres.c.code_registre], 
+                                                        back_populates='formation_ext',
+                                                        primaryjoin='and_(Registres.type_registre == ass_formations_ext_registres.c.type_registre, '
+                                                        'Registres.code_registre == ass_formations_ext_registres.c.code_registre)',
+                                                        secondaryjoin='FormationsExt.id_formation == ass_formations_ext_registres.c.id_formation'
+                                                        )
 class Nsf(Base):
     __tablename__ = "nsf"
     code_nsf = Column(String, primary_key=True, nullable=False)
@@ -85,14 +144,6 @@ class AssFormationsRegistres(Base):
 
     __table_args__ = (ForeignKeyConstraint(['type_registre','code_registre'],['registres.type_registre','registres.code_registre'],),)
 
-# class AssFormationsExtRegistres(Base):
-#     __tablename__ = "ass_formations_ext_registres"
-#     id_formation = Column(Integer, ForeignKey('formations_ext.id_formation'), primary_key=True)
-#     type_registre = Column(String, primary_key=True)
-#     code_registre = Column(Integer, primary_key=True)
-
-    # __table_args__ = (ForeignKeyConstraint(['type_registre','code_registre'],['registres.type_registre','registres.code_registre'],),)
-
 class AssRegistresNsf(Base):
     __tablename__ = "ass_registres_nsf"
     code_nsf= Column(String, ForeignKey('nsf.code_nsf'), primary_key=True)
@@ -109,11 +160,6 @@ class AssRegistresFormacodes(Base):
 
     __table_args__ = (ForeignKeyConstraint(['type_registre','code_registre'],['registres.type_registre','registres.code_registre'],),)
 
-# class AssRegionsFormationsExt(Base):
-#     __tablename__ = 'ass_regions_formations_ext'
-#     id_formation = Column(Integer, ForeignKey('formations_ext.id_formation'), primary_key=True)
-#     region = Column(String, ForeignKey('regions.region'), primary_key=True)
-
-# engine = create_engine('sqlite:///mydatabase.db')
-# Base.metadata.create_all(engine)
-# Session = sessionmaker(bind=engine)
+# if "__main__" == __name__:
+    
+#     Base.metadata.create_all(engine)

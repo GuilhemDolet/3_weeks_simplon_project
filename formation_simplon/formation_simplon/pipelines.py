@@ -20,6 +20,23 @@ from .models import AssFormationsRegistres
 from .models import AssRegistresNsf
 from .models import AssRegistresFormacodes
 # from .models import AssRegionsFormationsExt
+import os
+from dotenv import load_dotenv
+
+########################### automatisation avec le script_automatise et le .env
+
+# Spécifiez le chemin vers votre fichier .env
+env_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'scripts_azure', '.env')
+
+# Chargez les variables d'environnement depuis le fichier .env
+load_dotenv(dotenv_path=env_path)
+
+# Maintenant, vous pouvez accéder aux variables d'environnement comme d'habitude
+DATABASE_URL = os.getenv('DATABASE_URL')
+engine = create_engine(DATABASE_URL)
+
+########################### fin automatisation
+
 
 # pipeline de nettoyage
 class FormationSimplonPipeline:
@@ -266,11 +283,13 @@ class FormationSimplonPipeline:
             adapter["siret"] = siret
         return item
 
+
 # pipeline de mise en base de données     
 class Database:
     def __init__(self):
-        engine = create_engine('sqlite:///mydatabase.db')
-        Base.metadata.create_all(engine)
+        # engine = create_engine('postgresql+psycopg2://iratevenison3:qkDvlq24qQ1PUwqkuFNQRQ@pbo.postgres.database.azure.com:5432/simplondb')
+        # Base.metadata.create_all(engine)
+        # #à décommenter si l'auto marche pas
         Session = sessionmaker(bind=engine)
         self.session = Session()
         
