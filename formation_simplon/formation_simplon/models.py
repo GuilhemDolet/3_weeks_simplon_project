@@ -36,7 +36,7 @@ ass_formations_ext_registres = Table(
     Column('code_registre', Integer, primary_key=True),
     ForeignKeyConstraint(['type_registre', 'code_registre'], 
                          ['registres.type_registre', 'registres.code_registre'])
-)
+) #expliciter la contrainte clé composite de la table registre, qui se retrouve clé composite et étrangère dans la table ass_formations_ext_registres
 ass_formations_ext_regions = Table (
     'ass_formations_ext_regions', Base.metadata,
     Column('id_formation', Integer, ForeignKey('formations_ext.id_formation'), primary_key=True),
@@ -60,7 +60,25 @@ class FormationsExt(Base):
     id_formation = Column(Integer, primary_key=True, autoincrement=True, nullable=False)
     intitule_formation = Column(String)
     organisme = Column(String)
+class FormationsExt(Base):
+    __tablename__ = 'formations_ext'
+    id_formation = Column(Integer, primary_key=True, autoincrement=True, nullable=False)
+    intitule_formation = Column(String)
+    organisme = Column(String)
 
+    # relation many-to-many avec Registres
+    formation_ext = relationship("Registres", secondary=ass_formations_ext_registres, 
+                                 foreign_keys=[ass_formations_ext_registres.c.id_formation, 
+                                 ass_formations_ext_registres.c.type_registre, 
+                                 ass_formations_ext_registres.c.code_registre],
+                                 back_populates="registres_formation_ext",
+                                 primaryjoin='FormationsExt.id_formation == ass_formations_ext_registres.c.id_formation',
+                                 secondaryjoin='and_(Registres.type_registre == ass_formations_ext_registres.c.type_registre, '
+                                 'Registres.code_registre == ass_formations_ext_registres.c.code_registre)'
+                                 )
+
+    # relation many-to-many avec Registres
+    region = relationship("Regions", secondary=ass_formations_ext_regions, back_populates="formation_ext")
     # relation many-to-many avec Registres
     formation_ext = relationship("Registres", secondary=ass_formations_ext_registres, 
                                  foreign_keys=[ass_formations_ext_registres.c.id_formation, 
@@ -98,6 +116,8 @@ class Regions(Base):
     rel_session_region = relationship('SessionsFormations', back_populates='rel_region_session')
      # Relation many-to-many avec FormationExt
     formation_ext = relationship("FormationsExt", secondary=ass_formations_ext_regions, back_populates='region')
+     # Relation many-to-many avec FormationExt
+    formation_ext = relationship("FormationsExt", secondary=ass_formations_ext_regions, back_populates='region')
 class Registres(Base):
     __tablename__ = "registres"
     type_registre = Column(String)
@@ -112,6 +132,16 @@ class Registres(Base):
     rel_formation_registre = relationship('FormationsSimplon', secondary='ass_formations_registres', back_populates='rel_registre_formation')
     rel_nsf_registre = relationship('Nsf', secondary='ass_registres_nsf', back_populates='rel_registre_nsf')
     rel_formacode_registre = relationship('Formacodes', secondary='ass_registres_formacodes', back_populates='rel_registre_formacode')
+    # Relation many-to-many avec FormationExt
+    registres_formation_ext = relationship('FormationsExt', secondary=ass_formations_ext_registres, 
+                                           foreign_keys=[ass_formations_ext_registres.c.id_formation, 
+                                                        ass_formations_ext_registres.c.type_registre, 
+                                                        ass_formations_ext_registres.c.code_registre], 
+                                                        back_populates='formation_ext',
+                                                        primaryjoin='and_(Registres.type_registre == ass_formations_ext_registres.c.type_registre, '
+                                                        'Registres.code_registre == ass_formations_ext_registres.c.code_registre)',
+                                                        secondaryjoin='FormationsExt.id_formation == ass_formations_ext_registres.c.id_formation'
+                                                        )
     # Relation many-to-many avec FormationExt
     registres_formation_ext = relationship('FormationsExt', secondary=ass_formations_ext_registres, 
                                            foreign_keys=[ass_formations_ext_registres.c.id_formation, 

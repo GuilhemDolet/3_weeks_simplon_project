@@ -285,6 +285,11 @@ class FormationSimplonPipeline:
 
 
 # pipeline de mise en base de données     
+# engine = create_engine('sqlite:///mydatabase.db')
+# Base.metadata.create_all(engine)
+# Session = sessionmaker(bind=engine)
+# version proposée pour le local mixant les imports de scrap et les imports de json
+
 class Database:
     def __init__(self):
         # engine = create_engine('postgresql+psycopg2://iratevenison3:qkDvlq24qQ1PUwqkuFNQRQ@pbo.postgres.database.azure.com:5432/simplondb')

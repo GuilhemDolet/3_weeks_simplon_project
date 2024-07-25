@@ -3,6 +3,11 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/main/VisualStudio.gitignore
 
+# fichiers perso à ignorer
+moncompteformation_catalogueformation.csv
+.env
+*.csv
+essai.py
 # User-specific files
 
 *.venv
