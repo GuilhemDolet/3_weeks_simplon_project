@@ -9,7 +9,7 @@ url = "https://opendata.caissedesdepots.fr/api/explore/v2.1/catalog/datasets/mon
 query_params = {
     'select': "nom_of, nom_region, type_referentiel, libelle_niveau_sortie_formation, code_inventaire, code_rncp, intitule_certification, libelle_niveau_sortie_formation, code_formacode_1, code_formacode_2, code_formacode_3, code_formacode_4, code_formacode_5, libelle_code_formacode_principal, libelle_nsf_1, libelle_nsf_2, libelle_nsf_3, code_nsf_1, code_nsf_2, code_nsf_3",
     "where" : 'code_nsf_1 in ("100","114","125","255","300","310","315","320","321","326") or code_nsf_2 in ("100","114","125","255","300","310","315","320","321","326") or code_nsf_3 in ("100","114","125","255","300","310","315","320","321","326")',
-    # "limit" : 200,
+    "limit" : 1000,
     "timezone": "UTC",
     "include_links": "false",
     "include_app_metas": "false"
