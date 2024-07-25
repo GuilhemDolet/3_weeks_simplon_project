@@ -60,25 +60,7 @@ class FormationsExt(Base):
     id_formation = Column(Integer, primary_key=True, autoincrement=True, nullable=False)
     intitule_formation = Column(String)
     organisme = Column(String)
-class FormationsExt(Base):
-    __tablename__ = 'formations_ext'
-    id_formation = Column(Integer, primary_key=True, autoincrement=True, nullable=False)
-    intitule_formation = Column(String)
-    organisme = Column(String)
 
-    # relation many-to-many avec Registres
-    formation_ext = relationship("Registres", secondary=ass_formations_ext_registres, 
-                                 foreign_keys=[ass_formations_ext_registres.c.id_formation, 
-                                 ass_formations_ext_registres.c.type_registre, 
-                                 ass_formations_ext_registres.c.code_registre],
-                                 back_populates="registres_formation_ext",
-                                 primaryjoin='FormationsExt.id_formation == ass_formations_ext_registres.c.id_formation',
-                                 secondaryjoin='and_(Registres.type_registre == ass_formations_ext_registres.c.type_registre, '
-                                 'Registres.code_registre == ass_formations_ext_registres.c.code_registre)'
-                                 )
-
-    # relation many-to-many avec Registres
-    region = relationship("Regions", secondary=ass_formations_ext_regions, back_populates="formation_ext")
     # relation many-to-many avec Registres
     formation_ext = relationship("Registres", secondary=ass_formations_ext_registres, 
                                  foreign_keys=[ass_formations_ext_registres.c.id_formation, 
@@ -116,8 +98,7 @@ class Regions(Base):
     rel_session_region = relationship('SessionsFormations', back_populates='rel_region_session')
      # Relation many-to-many avec FormationExt
     formation_ext = relationship("FormationsExt", secondary=ass_formations_ext_regions, back_populates='region')
-     # Relation many-to-many avec FormationExt
-    formation_ext = relationship("FormationsExt", secondary=ass_formations_ext_regions, back_populates='region')
+   
 class Registres(Base):
     __tablename__ = "registres"
     type_registre = Column(String)
@@ -142,16 +123,7 @@ class Registres(Base):
                                                         'Registres.code_registre == ass_formations_ext_registres.c.code_registre)',
                                                         secondaryjoin='FormationsExt.id_formation == ass_formations_ext_registres.c.id_formation'
                                                         )
-    # Relation many-to-many avec FormationExt
-    registres_formation_ext = relationship('FormationsExt', secondary=ass_formations_ext_registres, 
-                                           foreign_keys=[ass_formations_ext_registres.c.id_formation, 
-                                                        ass_formations_ext_registres.c.type_registre, 
-                                                        ass_formations_ext_registres.c.code_registre], 
-                                                        back_populates='formation_ext',
-                                                        primaryjoin='and_(Registres.type_registre == ass_formations_ext_registres.c.type_registre, '
-                                                        'Registres.code_registre == ass_formations_ext_registres.c.code_registre)',
-                                                        secondaryjoin='FormationsExt.id_formation == ass_formations_ext_registres.c.id_formation'
-                                                        )
+
 class Nsf(Base):
     __tablename__ = "nsf"
     code_nsf = Column(String, primary_key=True, nullable=False)

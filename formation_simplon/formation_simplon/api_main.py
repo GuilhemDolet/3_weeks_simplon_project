@@ -17,13 +17,32 @@ from models import AssFormationsRegistres
 from models import AssRegistresNsf
 from models import AssRegistresFormacodes
 # from models import AssRegionsFormationsExt
+import os
+from dotenv import load_dotenv
 
+# Spécifiez le chemin vers votre fichier .env
+env_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'scripts_azure', '.env')
+
+# Chargez les variables d'environnement depuis le fichier .env
+load_dotenv(dotenv_path=env_path)
+
+#lancer fast api
 app = FastAPI()
 
 def session_open():
-    engine = create_engine('sqlite:///mydatabase.db', connect_args={"check_same_thread": False})   
-    Session = sessionmaker(bind=engine)
+    # engine = create_engine('sqlite:///mydatabase.db', connect_args={"check_same_thread": False})   
+    # Session = sessionmaker(bind=engine)
+    # session = Session()
+########################### automatisation avec le script_automatise et le .env
+
+    # Maintenant, vous pouvez accéder aux variables d'environnement comme d'habitude
+    DATABASE_URL = os.getenv('DATABASE_URL')
+    engine = create_engine(DATABASE_URL)
+########################### fin automatisation
+
+    Session = sessionmaker(bind=engine) # permet de gérer les transaction (ajout et modification et suppression de données)
     session = Session()
+
     return session
 
 # affichage des formations simplon dont l'intitulé de formation contient intitule
