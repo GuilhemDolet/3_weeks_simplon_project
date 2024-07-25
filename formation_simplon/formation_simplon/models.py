@@ -6,6 +6,7 @@ Base = declarative_base()
 engine = create_engine('sqlite:///mydatabase.db')
 Session = sessionmaker(bind=engine)
 
+
 #-------------------------- TABLE ASSOCIATIONS --------------------# 
 # Uniquement pour la partie de la BDD peuplé par les données de Mon compte formation
 

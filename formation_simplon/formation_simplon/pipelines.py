@@ -20,6 +20,8 @@ from .models import AssFormationsRegistres
 from .models import AssRegistresNsf
 from .models import AssRegistresFormacodes
 # from .models import AssRegionsFormationsExt
+# from .models import Session
+# from .create_db import Session
 
 # pipeline de nettoyage
 class FormationSimplonPipeline:
@@ -267,11 +269,13 @@ class FormationSimplonPipeline:
         return item
 
 # pipeline de mise en base de données     
+engine = create_engine('sqlite:///mydatabase.db')
+Base.metadata.create_all(engine)
+Session = sessionmaker(bind=engine)
+
 class Database:
     def __init__(self):
-        engine = create_engine('sqlite:///mydatabase.db')
-        Base.metadata.create_all(engine)
-        Session = sessionmaker(bind=engine)
+        
         self.session = Session()
         
     def process_item(self, item, spider):
