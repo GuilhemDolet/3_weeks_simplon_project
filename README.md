@@ -9,8 +9,8 @@ Simplon_benchmark v1
 Prérequis : 
 
 > il faut simplement exécuter le script à la racine du projet avec la commande : 
-- script_automatise.sh
-
+- . script_automatise.sh
+- ATTENTION besoin d'ajouter les codes d'authentification Azure dans le fichier script_azure_bdd.sh après la ligne : #### VARIABLES A METTRE (SECRET)
 ################################################################################################################################################################
 
 Explications : 

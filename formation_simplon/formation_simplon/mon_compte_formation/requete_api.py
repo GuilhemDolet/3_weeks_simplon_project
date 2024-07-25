@@ -1,15 +1,14 @@
 import json
 import requests
 from urllib.parse import urlencode, quote_plus
-import pandas as pd
-
+import pandas as pd #
 url = "https://opendata.caissedesdepots.fr/api/explore/v2.1/catalog/datasets/moncompteformation_catalogueformation/exports/json"
 
 # Paramètres de la requête
 query_params = {
     'select': "nom_of, nom_region, type_referentiel, libelle_niveau_sortie_formation, code_inventaire, code_rncp, intitule_certification, libelle_niveau_sortie_formation, code_formacode_1, code_formacode_2, code_formacode_3, code_formacode_4, code_formacode_5, libelle_code_formacode_principal, libelle_nsf_1, libelle_nsf_2, libelle_nsf_3, code_nsf_1, code_nsf_2, code_nsf_3",
     "where" : 'code_nsf_1 in ("100","114","125","255","300","310","315","320","321","326") or code_nsf_2 in ("100","114","125","255","300","310","315","320","321","326") or code_nsf_3 in ("100","114","125","255","300","310","315","320","321","326")',
-    # "limit" : 200,
+    "limit" : 1000,
     "timezone": "UTC",
     "include_links": "false",
     "include_app_metas": "false"
@@ -28,14 +27,16 @@ if response.status_code == 200:
 else:
     print(f"Erreur {response.status_code} lors de la récupération des données.")
 
-# Lire le fichier JSON
-with open('data.json', 'r', encoding='utf-8') as json_file:
-    data = json.load(json_file)
+
+
+# # Lire le fichier JSON
+# with open('data.json', 'r', encoding='utf-8') as json_file:
+#     data = json.load(json_file)
 
 # Convertir la liste de dictionnaires en DataFrame pandas
-df = pd.DataFrame(data)
+# df = pd.DataFrame(data)
 
-# Enregistrer le DataFrame en tant que fichier CSV
-df.to_csv('data.csv', index=False, encoding='utf-8')
+# # Enregistrer le DataFrame en tant que fichier CSV
+# df.to_csv('data.csv', index=False, encoding='utf-8')
 
-print("Données JSON converties en CSV avec succès.")
+# print("Données JSON converties en CSV avec succès.")
