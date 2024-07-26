@@ -1,11 +1,9 @@
 from models import Session, FormationsExt, Regions, Registres, Nsf, Formacodes
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
 
 import json
 from contextlib import contextmanager
 
-data_url = 'data.json'
+data_url = 'mon_compte_formation/data.json'
 
 
 @contextmanager
