@@ -1,10 +1,9 @@
-###################
-README INSTRUCTIONS
-###################
 
-####################
-Simplon_benchmark v1
-####################
+## README INSTRUCTIONS
+
+
+### Simplon_benchmark v1
+
 
 Prérequis : 
 
@@ -50,10 +49,32 @@ Voici comment fonctionne le projet (le script automatisé gère tout):
 - l'invite de commande affiche l'URL sur laquelle se rendre pour consulter les données filtrées selon les critères demandés en amont
 - pour ajouter supprimer ou modifier les commandes de filtres il faudra modifier le fichier api_main.py
 
+## GLOSSAIRE METIER
 
-###########
-DBMS SCHEMA
-###########
+```mermaid
+graph TD
+    RNCP[RNCP \n Répertoire National des Certifications Professionnelles]
+    RS[RS \n Répertoire Spécifique]
+    Formacode[Formacode \n Codes de Formations]
+    NSF[NSF \n Nomenclature des Spécialités de Formation]
+    Public[Public]
+    Prive[Privé]
+
+    RNCP --> NSF
+    RNCP --> Formacode
+    RS --> NSF
+    RS --> Formacode
+    
+    Public -.-> RNCP
+    Prive -.-> RNCP
+
+```
+
+Définitions à ajouter [...]
+
+
+## DBMS SCHEMA
+
 
 
 ```mermaid
