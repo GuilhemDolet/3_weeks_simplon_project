@@ -1,8 +1,7 @@
 import json
 import requests
 from urllib.parse import urlencode, quote_plus
-import pandas as pd
-
+import pandas as pd #
 url = "https://opendata.caissedesdepots.fr/api/explore/v2.1/catalog/datasets/moncompteformation_catalogueformation/exports/json"
 
 # Paramètres de la requête
@@ -28,14 +27,16 @@ if response.status_code == 200:
 else:
     print(f"Erreur {response.status_code} lors de la récupération des données.")
 
-# Lire le fichier JSON
-with open('data.json', 'r', encoding='utf-8') as json_file:
-    data = json.load(json_file)
+
+
+# # Lire le fichier JSON
+# with open('data.json', 'r', encoding='utf-8') as json_file:
+#     data = json.load(json_file)
 
 # Convertir la liste de dictionnaires en DataFrame pandas
-df = pd.DataFrame(data)
+# df = pd.DataFrame(data)
 
-# Enregistrer le DataFrame en tant que fichier CSV
-df.to_csv('data.csv', index=False, encoding='utf-8')
+# # Enregistrer le DataFrame en tant que fichier CSV
+# df.to_csv('data.csv', index=False, encoding='utf-8')
 
-print("Données JSON converties en CSV avec succès.")
+# print("Données JSON converties en CSV avec succès.")

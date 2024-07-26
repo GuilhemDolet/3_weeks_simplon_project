@@ -6,11 +6,12 @@ from contextlib import contextmanager
 data_url = 'mon_compte_formation/data.json'
 
 
-@contextmanager
+# Fonction pour sécuriser le fonctionnement d'ouverture et de fermeture des Sessions (débugage)
+@contextmanager # Créer un gestionnaire de contexte pour utiliser la constructions with avec la fonction session_scope.
 def session_scope(Session):
     session = Session()
     try:
-        yield session
+        yield session # return la session au moment de son utilisation avec 'with'
         session.commit()
     except:
         session.rollback()
@@ -19,6 +20,20 @@ def session_scope(Session):
         session.close()
 
 def load_json_into_databse(Session, data_url):
+    """
+    Charge les données à partir d'un fichier JSON dans une base de données en utilisant une session SQLAlchemy.
+
+    Cette fonction lit un fichier JSON, puis utilise une session de base de données pour remplir les tables
+    FormationsExt, Regions et Registres avec les données du fichier. Elle gère les relations et les vérifications
+    pour éviter les duplications et s'assure que les identifiants sont correctement générés.
+
+    Args:
+        Session (sqlalchemy.orm.sessionmaker): Une fabrique de sessions SQLAlchemy.
+        data_url (str): Le chemin vers le fichier JSON contenant les données à charger.
+
+    Raises:
+        Exception: Relève toutes les exceptions rencontrées lors de la gestion de la session de base de données.
+    """
     with open(data_url, 'r', encoding='utf-8') as file:
         data = json.load(file)
 
@@ -70,6 +85,20 @@ def load_json_into_databse(Session, data_url):
             check_and_load_formacodes(session, ligne_registre, entry)
 
 def check_and_load_nsf(session, ligne_registre, entry):
+    """
+    Vérifie et charge les données NSF dans la base de données et les associe à un registre.
+
+    Cette fonction vérifie si les codes NSF existent déjà dans la base de données. Si un code NSF n'existe pas,
+    il crée une nouvelle entrée. Ensuite, elle associe les codes NSF à la ligne de registre donnée.
+
+    Args:
+        session (sqlalchemy.orm.Session): La session SQLAlchemy utilisée pour les opérations de base de données.
+        ligne_registre (Registres): L'objet de registre auquel les codes NSF seront associés.
+        entry (dict): Les données de l'entrée JSON contenant les informations NSF.
+
+    Raises:
+        Exception: Relève toutes les exceptions rencontrées lors de la gestion de la session de base de données.
+    """
     nsf_dict = {
         'code_nsf_1': 'libelle_nsf_1',
         'code_nsf_2': 'libelle_nsf_2',
@@ -94,6 +123,21 @@ def check_and_load_nsf(session, ligne_registre, entry):
                 ligne_registre.rel_nsf_registre.append(nsf_instance)
 
 def check_and_load_formacodes(session, ligne_registre, entry):
+    """
+    Vérifie et charge les données Formacodes dans la base de données et les associe à un registre.
+
+    Cette fonction vérifie si les codes Formacodes existent déjà dans la base de données. Si un code Formacode
+    n'existe pas, il crée une nouvelle entrée. Ensuite, elle associe les codes Formacodes à la ligne de registre donnée.
+
+    Args:
+        session (sqlalchemy.orm.Session): La session SQLAlchemy utilisée pour les opérations de base de données.
+        ligne_registre (Registres): L'objet de registre auquel les codes Formacodes seront associés.
+        entry (dict): Les données de l'entrée JSON contenant les informations Formacodes.
+
+    Raises:
+        Exception: Relève toutes les exceptions rencontrées lors de la gestion de la session de base de données.
+    """
+    
     formacode_keys = ['code_formacode_1', 'code_formacode_2', 'code_formacode_3', 'code_formacode_4', 'code_formacode_5']
     formacode_codes = [entry.get(key) for key in formacode_keys]
     existing_formacodes = {code: session.query(Formacodes).filter_by(code_formacode=code).first() for code in formacode_codes if code}
