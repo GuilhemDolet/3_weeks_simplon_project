@@ -29,23 +29,35 @@ load_dotenv(dotenv_path=env_path)
 #lancer fast api
 app = FastAPI()
 
+# définition d'une session
 def session_open():
+    
+
+########################### DEBUT création locale d'une BDD pour le dev
+
     # engine = create_engine('sqlite:///mydatabase.db', connect_args={"check_same_thread": False})   
     # Session = sessionmaker(bind=engine)
     # session = Session()
-########################### automatisation avec le script_automatise et le .env
+    
+########################### FIN création locale d'une BDD pour le dev
 
-    # Maintenant, vous pouvez accéder aux variables d'environnement comme d'habitude
+########################### DEBUT automatisation avec le script_automatise et le .env
+
+    # creation automatisee de l'engine grâce au .env
     DATABASE_URL = os.getenv('DATABASE_URL')
     engine = create_engine(DATABASE_URL)
-########################### fin automatisation
+    
+########################### FIN automatisation
 
-    Session = sessionmaker(bind=engine) # permet de gérer les transaction (ajout et modification et suppression de données)
+# création d'une sesssion 
+# permet de gérer les transaction (ajout et modification et suppression de données)
+
+    Session = sessionmaker(bind=engine) 
     session = Session()
 
     return session
 
-# affichage des formations simplon dont l'intitulé de formation contient intitule
+# affichage des formations simplon dont l'intitulé de formation contient la str renseignée  dans la variable intitulé
 @app.get("/formation_simplon_from_intitule")
 def get_formation_simplon(intitule:str):
     session = session_open()
@@ -58,7 +70,7 @@ def get_formation_simplon(intitule:str):
         session.close()
         return "pas trouvé"
     
-# affichage des formations simplon et des sessions dont l'intitulé de formation contient intitule
+# affichage des formations simplon et des sessions dont l'intitulé de formation la str renseignée dans la variable intitulé
 @app.get("/formations_sessions")
 def get_formation_session(intitule:str):
     session = session_open()
@@ -85,7 +97,7 @@ def get_formation_session(intitule:str):
         session.close()
         return "pas trouvé" 
 
-# affichage des formations simplon,sessions et regions dont l'intitulé de formation contient intitule    
+# affichage des formations simplon, sessions et regions dont l'intitulé de formation contient la str dans la variable intitulé    
 @app.get("/session_region")
 def get_session_region(intitule:str):
     session = session_open()
