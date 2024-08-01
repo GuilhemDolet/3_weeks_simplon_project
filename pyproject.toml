@@ -16,6 +16,7 @@ psycopg2 = "^2.9.9"
 dateparser = "^1.2.0"
 requests = "^2.32.3"
 pandas = "^2.2.2"
+uvicorn = "^0.30.4"
 
 [build-system]
 requires = ["poetry-core"]

@@ -8,11 +8,14 @@ cd scripts_azure/
 cd .. #remonter dans le dossier parent 
 
 cd formation_simplon/formation_simplon/mon_compte_formation
+
 poetry run python requete_api.py #exécution de la requête api pour récupérer les données de mon compte formation dans un csv
+echo "___datas_taken_from_mon_compte_formation___"
 cd .. #remonter dans le dossier parent cad formation_simplon/formation_simplon
 poetry run python create_db.py # créer les tables dans Azure
+echo "___tables_creation___ finish"
 poetry run python import_bdd.py #import des données csv de la requête api dans la BDD Azure
-
+echo "___datas_from_mon_compte_formation_copied_into_azure_BDD___"
 
 ######## instructions dev pour la suite :
 # - noter l'adresse de BDD affichée dans la console (normalement elle se charge dans le .env du dossier scripts_azure)
